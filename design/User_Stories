@@ -1,0 +1,24 @@
+Sistema de gerenciamento de gastos pessoais
+US1
+Descrição:
+Como usuário quero poder ver um painel com meus gasto mensais e limite disponível, para que eu possa controlar meu orçamento diário
+Critérios de aceitação:
+- O sistema deve registrar os gastos fixos cadastrados
+- O sistema deve exibir meu saldo atualizado disponível na conta
+- O sistema deve calcular e exibir meu limite de gastos restantes para o mês
+
+US2
+Descrição:
+Como responsável financeiro quero administrar a conta do meu filho, para que eu possa orientar ele na sua organização financeira e determinar limites de gastos
+Critérios de aceitação:
+  - O responsável deve conseguir vincular a conta de um dependente através de um módulo de gestão familiar
+  - O responsável deve conseguir definir um teto de gastos mensal para o dependente
+  - O sistema deve permitir que o responsável visualiza o histórico de transações do dependente
+  - O responsável deve ter permissão para definir onde o dependente pode realizar seus investimentos
+
+  US3
+  Descrição:
+  Como gerente financeiro quero poder acessar e analisar a conta dos meus clientes, para que eu possa sugerir orçamentos e realizar investimentos autorizados
+  - O gerente deve possuir um painel para listar e alternar entre as contas dos clientes de sua responsabilidade
+  - O gerente deve poder executar investimentos utilizando o saldo que o cliente disponibilizar para isso
+  - O gerente deve conseguir enviar sugestões de gastos e orçamentos personalizados com base na renda do cliente
