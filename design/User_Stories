@@ -22,3 +22,36 @@ Critérios de aceitação:
   - O gerente deve possuir um painel para listar e alternar entre as contas dos clientes de sua responsabilidade
   - O gerente deve poder executar investimentos utilizando o saldo que o cliente disponibilizar para isso
   - O gerente deve conseguir enviar sugestões de gastos e orçamentos personalizados com base na renda do cliente
+  
+  US4
+  Descrição:
+  Como usuário quero que o sistema salve minhas despesas fixas mensais e, que espere minha confirmação para debitar do meu saldo atual.
+
+  Critérios de aceitação:
+  - O usuário deve conseguir cadastrar duas despesas fixas mensais.
+  - O sistema deve notificar e esperar pela confirmação do usuário para débito.
+
+  US5
+  Descrição:
+  Como usuário quero poder definir despesas que podem debitar automaticamente do meu saldo e as que precisam da minha permissão.
+
+  Critérios de aceitação:
+  - O sistema deve ter a opção de débito automático.
+  - O usuário deve conseguir alterar as opções de débito automático. 
+
+  US6
+  Descrição:
+  Como usuário quero quero poder ver projeções futuras da minha situação financeira, como despesas mensais e dividas. Também quero poder fazer simulações de gastos para ajudar a tomar decisões financeiras. 
+
+  Critérios de aceitação:
+  - O sistema deve mostrar despesas atuais e futuras.
+  - O sistema deve possuir a opção de simular gastos.
+  
+  
+  
+  
+  
+  
+  
+  
+  
