@@ -4,10 +4,10 @@
 #include <string>
 #include <vector>
 
-class Usuario;
-class Conta;
-class Transacao;
-class Orcamento;
+#include "Usuario.hpp"
+#include "Conta.hpp"
+#include "Transacao.hpp"
+#include "Orcamento.hpp"
 
 /**
  * @brief Classe responsável por coordenar contas, transações e orçamentos do usuário.
