@@ -4,10 +4,9 @@
 ## Integrantes
 
 - Giulia Coacci Brum
-- Maísa Oliveira dos Santos de Sá
 - João Paulo Varjão Trancoso
+- Maísa Oliveira dos Santos de Sá
 - Nicolas Ferreira Costa Gomes
-- [Nome do integrante 5]
 
 ## Descrição do Projeto
 
