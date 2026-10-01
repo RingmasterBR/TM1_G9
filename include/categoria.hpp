@@ -26,7 +26,7 @@ enum class TipoGasto {
  * @brief Forma de pagamento utilizada na transação.
  */
 
-enum class categoria {
+enum class FormaPagamento {
     Credito,
     Debito,
     Pix
