@@ -43,7 +43,35 @@ private:
     std::string nome;
     TipoGasto tipo;
     FormaPagamento forma;
+
+public:
+    /**
+     * @brief Construtor da classe Categoria.
+     * @param nome Nome da categoria.
+     * @param tipo Tipo de gasto associado.
+     * @param forma Forma de pagamento associada.
+     */
+    Categoria(std::string nome, TipoGasto tipo, FormaPagamento forma);
  
+    /**
+     * @brief Retorna o nome da categoria.
+     * @return Nome da categoria.
+     */
+    std::string getNome();
+ 
+    /**
+     * @brief Retorna o tipo de gasto da categoria.
+     * @return Tipo de gasto.
+     */
+    TipoGasto getTipo();
+ 
+    /**
+     * @brief Retorna a forma de pagamento da categoria.
+     * @return Forma de pagamento.
+     */
+    FormaPagamento getFormaPagamento();
+};
+
 
 
 #endif
