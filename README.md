@@ -10,7 +10,7 @@
 
 ## Descrição do Projeto
 
-O **Sistema de Gerenciamento de Gastos Pessoais** é um sistema desenvolvido em C++11 com foco na aplicação dos conceitos de Programação Orientada a Objetos estudados na disciplina de Programação e Desenvolvimento de Software II (PDS II).
+O **Sistema de Gerenciamento de Gastos Pessoais** é um sistema desenvolvido em C++ com foco na aplicação dos conceitos de Programação Orientada a Objetos estudados na disciplina de Programação e Desenvolvimento de Software II (PDS II).
 
 O sistema permite o controle completo das finanças pessoais do usuário, possibilitando o cadastro de contas, o registro de receitas e despesas, a organização por categorias e a definição de orçamentos com alertas de estouro. Também oferece a geração de relatórios financeiros e a persistência dos dados em arquivos de texto.
 
