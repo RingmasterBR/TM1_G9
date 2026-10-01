@@ -84,7 +84,7 @@ A aplicação foi desenvolvida utilizando conceitos como herança, polimorfismo,
 
 ## Tecnologias Utilizadas
 
-- C++11
+- C++
 - Programação Orientada a Objetos (POO)
 - Testes unitários
 - Makefile
