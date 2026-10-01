@@ -14,6 +14,7 @@
 
 class Despesa : public Transacao {
 private:
+    int diaCobranca_;
     bool ehFixa_;
     
 public:
@@ -24,8 +25,9 @@ public:
     * @param categoria Ponteiro para a categoria do gasto.
     * @param data Data da despesa.
     * @param ehFixa Indica se é uma despesa mensal.
+    * @param diaCobranca Dia do mês da cobrança (1 a 31, padrão: 0 para não fixas).
     */
-    Despesa(double valor, std::string descricao, Categoria* categoria, std::string data, bool ehFixa = false);
+    Despesa(double valor, std::string descricao, Categoria* categoria, std::string data, bool ehFixa = false, int diaCobranca = 0);
 
     /**
     * @brief Destrutor da classe.
@@ -43,6 +45,18 @@ public:
     * @param ehFixa Seta o estado da despesa.
     */
     void setFixa(bool ehFixa);
+
+    /**
+    * @brief Retorna o dia dos mês que a despesa é cobrada.
+    * @return Número do dia do mês (1 a 31).
+    */
+    int getDiaCobranca() const;
+
+    /**
+    * @brief Atualiza o dia do mês para a cobrança de despesa fixa.
+    * @param diaCobranca Novo dia do mês (1 a 31).
+    */
+    void setDiaCobranca(int diaCobranca);
 };
 
 #endif
