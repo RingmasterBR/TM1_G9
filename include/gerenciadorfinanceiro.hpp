@@ -18,8 +18,8 @@
  */
 class GerenciadorFinanceiro {
 private:
-    Usuario* usuario;
-    std::vector<Orcamento*> orcamentos;
+    Usuario* usuario_;
+    std::vector<Orcamento*> orcamentos_;
  
 public:
     /**
