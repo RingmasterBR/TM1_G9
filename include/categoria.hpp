@@ -40,9 +40,9 @@ enum class FormaPagamento {
 
 class Categoria {
 private:
-    std::string nome;
-    TipoGasto tipo;
-    FormaPagamento forma;
+     std::string nome_;
+    TipoGasto tipo_;
+    FormaPagamento forma_;
 
 public:
     /**
