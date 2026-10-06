@@ -6,7 +6,7 @@
 - Giulia Coacci Brum
 - João Paulo Varjão Trancoso
 - Maísa Oliveira dos Santos de Sá
-- Nicolas Ferreira Costa Gomes
+  
 
 ## Descrição do Projeto
 
