@@ -16,6 +16,7 @@ class Receita : public Transacao {
 private:
     int diaRecebimento_;
     bool ehFixa_;
+    double realizarTransacaoReceita();
     
 public:
     /**
@@ -62,7 +63,6 @@ public:
     * @brief Realiza a transacao referente a receita. Implementacao deve instanciar objeto transacao.
     * @param diaCobranca Novo dia do mês (1 a 31).
     */
-    void realizarTransacaoReceita();
 
 
 };

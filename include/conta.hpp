@@ -37,24 +37,13 @@ class Conta {
         * @return Divida atual.
         */
         double getDivida();
-
+        
         /**
-        * @brief Soma um valor ao saldo da conta.
-        * @param valor Valor a ser somado.
+        * @brief Update o valor de divida e de saldo.
         */
-        double updateSaldo(double valor);
 
-        /**
-        * @brief Define um valor à Divida da conta.
-        * @param valor Novo valor.
-        */
-        double setDivida(double valor);
+        void UpdateDividaESaldo(){}
 
-        /**
-        * @brief Subtrai um valor ao saldo da conta.
-        * @param valor Valor a ser subtraido.
-        */
-        double subSaldo(double valor);
 
 }
 

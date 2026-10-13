@@ -16,6 +16,7 @@ class Despesa : public Transacao {
 private:
     int diaCobranca_;
     bool ehFixa_;
+    void realizarTransacaoDespesa();
     
 public:
     /**
@@ -62,7 +63,6 @@ public:
     * @brief Realiza a transacao referente a despesa. Implementacao deve instanciar objeto transacao.
     * @param diaCobranca Novo dia do mês (1 a 31).
     */
-    void realizarTransacaoDespesa();
 
 };
 
