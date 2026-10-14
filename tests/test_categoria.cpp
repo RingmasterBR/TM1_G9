@@ -24,3 +24,12 @@ TEST_CASE("Categoria - Todos os tipos de gasto") {
     CHECK(e.getTipo() == TipoGasto::Educacao);
     CHECK(f.getTipo() == TipoGasto::Outros);
 }
+TEST_CASE("Categoria - Todas as formas de pagamento") {
+    Categoria a("A", TipoGasto::Outros, FormaPagamento::Credito);
+    Categoria b("B", TipoGasto::Outros, FormaPagamento::Debito);
+    Categoria c("C", TipoGasto::Outros, FormaPagamento::Pix);
+ 
+    CHECK(a.getFormaPagamento() == FormaPagamento::Credito);
+    CHECK(b.getFormaPagamento() == FormaPagamento::Debito);
+    CHECK(c.getFormaPagamento() == FormaPagamento::Pix);
+}
