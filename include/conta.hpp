@@ -2,49 +2,34 @@ ifndef CONTA_HPP
 #define CONTA_HPP
  
 #include <iostream>
+#include <list>
+
 #include "usuario.hpp"
+#include "lancamentos.hpp"
+#include "transacao.hpp"
+
  
 class Conta {
  
     private :
- 
-        /// @param user Usuário associado a conta.
-        Usuario user;
- 
-        /// @param saldo Saldo atual da conta.
-        double saldo;
- 
-        /// @param divida Divida total da conta.
-        double divida;
+        Usuario user; //Usuario da conta
+        double saldo; //Valor atual do saldo da conta
+        double divida; //Valor atual da divida da conta
+        void setSaldo(); //Metodo deve setar saldo igual ao saldo final da ultima transacao da lista de transacoes
+        void setDivida(); //Metodo deve setar divida igual ao saldo final da ultima transacao da lista de transacoes
+        std::list<Lancamentos*>lancamentosFuturos; //Lista de lancamentos da conta 
+        std::list<Transacao*>listaTransacao; //Lista de transacoes da conta
  
     public :
- 
-        /**
-        * @brief Construtor: cria a conta e carrega o Nome e ID para o usuário.
-        * @param nome Nome do usuário.
-        * @param id   ID do usuário.
-        */
-        Conta(string nome, int id) : user(nome, id), saldo(0), divida(0) {}
- 
-        /**
-        * @brief Retorna o Saldo atual da conta.
-        * @return Saldo atual.
-        */
+        void addLancamento(Lancamento* lancamento);
+        void addTransacao(Transacao* transacao);
+
+        //Construtor:
+        Conta(std::string nome, int id); //Recebe o nome e o ID do usuario. 
+
+        //Metodos publicos
         double getSaldo();
- 
-        /**
-        * @brief Retorna a Divida total da conta.
-        * @return Divida atual.
-        */
-        double getDivida();
-        
-        /**
-        * @brief Update o valor de divida e de saldo.
-        */
- 
-        void UpdateDividaESaldo(){}
- 
- 
+        double getDivida();         
 };
  
 #endif

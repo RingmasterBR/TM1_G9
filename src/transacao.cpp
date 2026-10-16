@@ -1,85 +1,69 @@
-#include "transacao.hpp"
-#include "conta.hpp"
-#include "despesa.hpp"
-#include "receita.hpp"
-#include <stdexcept>
 
-// Construtor para transações do tipo Despesa
-Transacao::Transacao(const Conta& contaRef, FormaPagamento formaDePagamento, std::string categoriaNome, valorTransacao)
-    : conta(new Conta(contaRef)),
-      despesa(new Despesa(despesaObj)),
-      forma(formaDePagamento),
-      categoria(categoriaNome),
-      valor(valorTransacao),
-      saldoAnterior(contaRef.getSaldo()),
-      dividaAnterior(contaRef.getDivida())
-{
-    // Calcula os valores finais pós-transação
-    saldoFinal = updateSaldo(*conta);
-    dividaFinal = updateDivida(*conta);
-}
+// Inclusões próprias do C++
+#include <iostream>
+#include <string>
+#include<list>
+#include <chrono>
 
-// Destrutor para liberação da memória alocada dinamicamente
-Transacao::~Transacao() {
-    delete conta;
-    delete receita;
-    delete despesa;
-}
+    void Transacao::Transacao(Conta* contaTransacao, double valorTransacao){
+        conta = contaTransacao;
+        valor = valorTransacao;
+        saldoFinal = contaTransacao->getSaldo();        
+        dividaFinal = contaTransacao->getDivida();      
+        saldoAnterior = contaTransacao->getSaldo();   
+        dividaAnterior= contaTransacao->getDivida();     
+    };
 
-Conta Transacao::getConta() const {
-    if (conta != nullptr) {
-        return *conta;
+    Transacao::~Transacao() = default;
+
+    Conta* Transacao::getConta() const{
+        return  conta;
     }
-    throw std::runtime_error("Conta associada nula.");
-}
-
-double Transacao::getSaldoFinal() const {
-    return saldoFinal;
-}
-
-double Transacao::getDividaFinal() const {
-    return dividaFinal;
-}
-
-double Transacao::getSaldoAnterior() const {
-    return saldoAnterior;
-}
-
-double Transacao::getDividaAnterior() const {
-    return dividaAnterior;
-}
-
-int Transacao::ValidarDados() {}
-
-
-double Transacao::updateSaldo() {
-    double saldoAtual = saldoAnterior;
-    double dividaAtual = dividaAnterior;
-
-    // Se for despesa paga no cartão de crédito, o saldo não diminui imediatamente na conta corrente
-    if (forma != FormaPagamento::Credito) {
-        saldoAtual -= valor;
+    double Transacao:: getSaldoFinal() const{
+        return saldoFinal;
     }
-    // Se for receita, o saldo aumenta
-    else if () {
-        saldoAtual += valor;
+    double Transacao:: getDividaFinal() const{
+        return dividaFinal;
     }
-
-    return saldoAtual;
-}
-
-double Transacao::updateDivida() {
-    double dividaAtual = dividaAnterior;
-    double saldoAtual = saldoAnterior;
-
-    // Se for despesa efetuada via crédito, incrementa o valor da dívida da conta
-    if (forma == FormaPagamento::Credito) {
-        dividaAtual += valor;
+    double Transacao:: getSaldoAnterior() const{
+        return saldoAnterior
     }
-    else {
-        saldoAtual += valor;
+    
+    double Transacao:: getDividaAnterior() const{
+        return dividaAnterior
     }
+    
+    Transacao::int ValidarDados(){
+    }        
 
-    return dividaAtual;
-}
+    //Percorre vetor de lançamento de conta e recalcula, atualiza saldo e divida Final da propria transacao. 
+    void Transacao :: updateSaldoEDivida(){
+        int qtdLancamentos = conta-> lancamentosFuturos.size();
+        using namespace std::chrono;
+        year_month_day hoje = floor<days>(system_clock::now());
+
+        for(auto it = conta->lancamentosFuturos.begin(); it != conta-> lancamentosFuturos.end()){
+            Lancamentos* l = *it;
+            if (l-> tipo == TipoDespesa && ll-> data > hoje){
+                dividaFinal = dividaAtual + l-> valor;
+            }else if(l-> tipo = TipoDespesa && l-> data == hoje){
+                saldoFinal = saldoAtual - l-> valor;
+            }else if (l-> tipo = TipoReceita && l-> data == hoje){
+                saldoFinal = saldoAtual + l-> valor;
+            }
+            if(!l-> ehfixo){
+                conta->lancamentosFuturos.erase(it);
+                ++it;
+            }else{
+                ++it;
+            }
+        }
+    } 
+    
+    //Adiciona a transacao atual na lista de transacao da classe conta toda vez que um objeto transacao eh criado.    
+    void Transacao::updateListaTransacao(){
+        if(saldoAnterior != sandoAtual || dividaAnterior != dividaAtual){
+            conta-> addTransacao(this);
+        }
+    }   
 
