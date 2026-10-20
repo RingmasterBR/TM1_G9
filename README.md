@@ -21,7 +21,6 @@ A aplicação foi desenvolvida utilizando conceitos como herança, polimorfismo,
 ### Controle de Usuário e Contas
 
 - Cadastro e autenticação do usuário
-- Cadastro de múltiplas contas (corrente, poupança, carteira)
 - Atualização automática de saldo a cada transação
 - Consulta de extrato por conta
 
