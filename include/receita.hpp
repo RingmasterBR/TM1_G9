@@ -11,7 +11,7 @@ class Receita : public Lancamentos {
 private:    
 public:    
     //Construtor para despesas fixas
-    Receita(const double valorDaReceita, Categoria& categoriaDaReceita, std::year_month_day dataDaReceita, Conta& contaDaReceita, bool ehfixo){}
+    Receita(const double valorDaReceita, Categoria* categoriaDaReceita, std::year_month_day dataDaReceita, Conta* contaDaReceita, bool ehfixo){}
 
     
     //Construtor para despesas nao fixas    

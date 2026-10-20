@@ -1,27 +1,40 @@
-#include <string>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
 #include <chrono>
-#include <list>
 
-#include "transacao.hpp"
-#include "categoria.hpp"
-#include "lancamentos.hpp"
-#include "despesa.hpp"
+#include "Despesa.hpp"
+#include "Conta.hpp"
+#include "Categoria.hpp"
+#include "Usuario.hpp"
 
-       
-    //Construtor para despesas 
-    Despesa:: Despesa(const double valordaDespesa, Categoria* categoriadaDespesa, std::year_month_day dataDaDespesa, Conta* contaDaDespesa, bool ehfixo){
-        valor = valordaDespesa;
-        categoria = categoriadaDespesa;
-        data = dataDaDespesa;
-        conta = contaDaDespesa;
-        tipo = TipoDespesa;
-        LancamentoFixo = ehfixo;
-    }
+TEST_CASE("Testando a classe Despesa e suas operações") {
+    // Configuração prévia de dependências necessárias
+    Usuario usuario("Carlos Aluguel", 303, "senha123");
+    Conta conta(&usuario, "Conta Corrente");
+    Categoria categoria("Moradia");
     
-    //Construtor para despesas nao fixas    
-     Despesa::~Despesa() = default;
+    // Definindo uma data padrão usando std::chrono (C++20)
+    std::year_month_day dataExemplo{std::chrono::year(2026), std::chrono::month(10), std::chrono::day(15)};
 
-    //Instancia novo objeto de lancamento de  
-    void Despesa:: addLancamentosFuturos(){
-        conta->addLancamento(this);
-     };
+    SUBCASE("Construção e verificação de atributos de uma Despesa") {
+        // Criando uma despesa fixa de 1500.00
+        Despesa despesa(1500.00, &categoria, dataExemplo, &conta, true);
+
+        CHECK(despesa.valor == 1500.00);
+        CHECK(despesa.tipo == Lancamentos::TipoDespesa);
+        CHECK(despesa.LancamentoFixo == true);
+        CHECK(despesa.conta == &conta);
+        CHECK(despesa.categoria == &categoria);
+    }
+
+    SUBCASE("Adicionando despesa aos lançamentos futuros da conta") {
+        Despesa despesa(350.00, &categoria, dataExemplo, &conta, false);
+
+        // Executando o método que adiciona à conta
+        despesa.addLancamentosFuturos();
+
+        // Verificamos que a operação ocorreu sem erros
+        CHECK(despesa.valor == 350.00);
+        CHECK(despesa.LancamentoFixo == false);
+    }
+}

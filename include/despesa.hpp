@@ -13,7 +13,7 @@
 class Despesa : public Lancamentos {
 public:    
     //Construtor para despesas fixas
-    Despesa(const double valordaDespesa, Categoria& categoriadaDespesa, std::year_month_day dataDaDespesa, Conta& contaDaDespesa, bool ehfixo){}
+    Despesa(const double valordaDespesa, Categoria* categoriadaDespesa, std::year_month_day dataDaDespesa, Conta* contaDaDespesa, bool ehfixo){}
 
     
     //Construtor para despesas nao fixas    
