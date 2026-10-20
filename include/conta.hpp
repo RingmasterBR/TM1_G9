@@ -1,35 +1,37 @@
-ifndef CONTA_HPP
+#ifndef CONTA_HPP
 #define CONTA_HPP
  
 #include <iostream>
 #include <list>
+#include <string>
 
-#include "usuario.hpp"
 #include "lancamentos.hpp"
 #include "transacao.hpp"
 
- 
+// Forward declaration para evitar dependência circular com Usuario
+class Usuario;
+
 class Conta {
- 
     private :
-        Usuario user; //Usuario da conta
-        double saldo; //Valor atual do saldo da conta
-        double divida; //Valor atual da divida da conta
-        void setSaldo(); //Metodo deve setar saldo igual ao saldo final da ultima transacao da lista de transacoes
-        void setDivida(); //Metodo deve setar divida igual ao saldo final da ultima transacao da lista de transacoes
-        std::list<Lancamentos*>lancamentosFuturos; //Lista de lancamentos da conta 
-        std::list<Transacao*>listaTransacao; //Lista de transacoes da conta
- 
+        Usuario* user; // Ponteiro para o usuário dono da conta
+        double saldo; 
+        double divida; 
+        void setSaldo(); 
+        void setDivida(); 
+        std::list<Lancamentos*> lancamentosFuturos; 
+        std::list<Transacao*> listaTransacao; 
+
     public :
-        void addLancamento(Lancamento* lancamento);
+        std::string NomeDaConta;
+
+        void addLancamento(Lancamentos* lancamento);
         void addTransacao(Transacao* transacao);
 
-        //Construtor:
-        Conta(std::string nome, int id); //Recebe o nome e o ID do usuario. 
+        // Construtor atualizado para receber também o ponteiro do usuário e o nome da conta
+        Conta(Usuario* usuario, std::string nomeDaContaAtual); 
 
-        //Metodos publicos
         double getSaldo();
-        double getDivida();         
+        double getDivida();   
 };
  
 #endif
