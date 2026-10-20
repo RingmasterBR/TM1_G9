@@ -1,10 +1,11 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest.h"
+
 #include "Usuario.hpp"
 #include "Conta.hpp"
 #include "Lancamentos.hpp"
+#include "doctest.h"
 
-TEST_CASE("Testando a classe Conta e as suas operações") {
+
+TEST_CASE("Testando a classe Conta e as suas operacoes") {
     // Instanciação prévia de um utilizador válido para associar à conta
     Usuario usuario("Maria Souza", 202, "senhaSegura456");
 

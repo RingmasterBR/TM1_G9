@@ -9,7 +9,7 @@
 
 //Instancia objeto de transacao
 void Lancamentos :: realizarTransacao(){
-    Transacao* transacao = new Transacao(conta, valor);
+    new Transacao(conta, valor);
 } 
 
 

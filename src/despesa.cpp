@@ -5,11 +5,12 @@
 #include "transacao.hpp"
 #include "categoria.hpp"
 #include "lancamentos.hpp"
+#include "conta.hpp"
 #include "despesa.hpp"
 
        
     //Construtor para despesas 
-    Despesa:: Despesa(const double valordaDespesa, Categoria* categoriadaDespesa, std::year_month_day dataDaDespesa, Conta* contaDaDespesa, bool ehfixo){
+    Despesa:: Despesa(const double valordaDespesa, Categoria* categoriadaDespesa, std::chrono::year_month_day dataDaDespesa, Conta* contaDaDespesa, bool ehfixo){
         valor = valordaDespesa;
         categoria = categoriadaDespesa;
         data = dataDaDespesa;
@@ -18,10 +19,10 @@
         LancamentoFixo = ehfixo;
     }
     
-    //Construtor para despesas nao fixas    
-     Despesa::~Despesa() = default;
 
     //Instancia novo objeto de lancamento de  
     void Despesa:: addLancamentosFuturos(){
-        conta->addLancamento(this);
+        if(conta!= nullptr){
+            conta->addLancamento(this);
+        }
      };

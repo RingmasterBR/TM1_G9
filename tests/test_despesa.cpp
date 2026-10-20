@@ -1,27 +1,38 @@
-#include "doctest.h"
+
+#include <chrono>
+
 #include "despesa.hpp"
+#include "conta.hpp"
 #include "categoria.hpp"
+#include "usuario.hpp"
+#include "doctest.h"
 
-TEST_CASE("Despesa - Criacao e getters basicos") {
-    Categoria cat("Alimentacao");
-    Despesa d(150.0, "Mercado", &cat, "14/10/2026", false);
 
-    CHECK(d.getValor() == 150.0);
-    CHECK(d.getDescricao() == "Mercado");
-    CHECK(d.isFixa() == false);
-    CHECK(d.getDiaCobranca() == 0);
-}
+TEST_CASE("Testando a classe Despesa e suas operacoes") {
+    Usuario usuario("Carlos Aluguel", 303, "senha123");
+    Conta conta(&usuario, "Conta Corrente");
+    
+    // Ajuste os parâmetros de Categoria conforme o seu enum real em Categoria.hpp
+    Categoria categoria(TipoGasto::Alimentacao, FormaPagamento::Pix); 
 
-TEST_CASE("Despesa - Configuração de despesa fixa") {
-    Categoria cat("Moradia");
-    Despesa d(1200.0, "Aluguel", &cat, "01/10/2026", true, 5);
+    // Adicionado o 'std::chrono::' para o compilador encontrar o tipo correto
+    std::chrono::year_month_day dataExemplo{std::chrono::year(2026), std::chrono::month(10), std::chrono::day(15)};
 
-    CHECK(d.isFixa() == true);
-    CHECK(d.getDiaCobranca() == 5);
+    SUBCASE("Construção e verificação de atributos de uma Despesa") {
+        Despesa despesa(1500.00, &categoria, dataExemplo, &conta, true);
 
-    d.setDiaCobranca(10);
-    CHECK(d.getDiaCobranca() == 10);
+        CHECK(despesa.valor == 1500.00);
+        CHECK(despesa.tipo == Lancamentos::TipoDespesa);
+        CHECK(despesa.LancamentoFixo == true);
+        CHECK(despesa.conta == &conta);
+        CHECK(despesa.categoria == &categoria);
+    }
 
-    d.setFixa(false);
-    CHECK(d.isFixa() == false);
+    SUBCASE("Adicionando despesa aos lançamentos futuros da conta") {
+        Despesa despesa(350.00, &categoria, dataExemplo, &conta, false);
+        despesa.addLancamentosFuturos();
+
+        CHECK(despesa.valor == 350.00);
+        CHECK(despesa.LancamentoFixo == false);
+    }
 }

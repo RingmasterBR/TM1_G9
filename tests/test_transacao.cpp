@@ -1,10 +1,10 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
-#include "Transacao.hpp"
-#include "Conta.hpp"
-#include "Usuario.hpp"
+#include "conta.hpp"
+#include "transacao.hpp"
+#include "usuario.hpp"
+#include "lancamentos.hpp"
 
-TEST_CASE("Testando a classe Transacao e os seus métodos principais") {
+TEST_CASE("Testando a classe Transacao e os seus metodos principais") {
     // Cenário inicial para associar à transação
     Usuario usuario("Carlos Transacao", 505, "senhaTransacao123");
     Conta conta(&usuario, "Conta Transações");
