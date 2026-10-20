@@ -15,7 +15,7 @@ public:
     //Atributos:
     double valor;
     Categoria* categoria;
-    std::year_month_day data;
+    std::chrono::year_month_day data;
     Conta* conta;
     enum tipoLancamento {TipoReceita, TipoDespesa};
     tipoLancamento tipo;

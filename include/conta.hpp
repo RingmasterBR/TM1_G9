@@ -5,11 +5,11 @@
 #include <list>
 #include <string>
 
-#include "lancamentos.hpp"
 #include "transacao.hpp"
 
 // Forward declaration para evitar dependência circular com Usuario
 class Usuario;
+class Lancamentos;
 
 class Conta {
     private :

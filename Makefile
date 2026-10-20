@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -std=c++17 -Wall -Wextra --coverage -Iinclude -Itests -O0
+CFLAGS = -std=c++20 -Wall -Wextra --coverage -Iinclude -Itests -O0
 
 SRC_DIR = src
 INC_DIR = include
