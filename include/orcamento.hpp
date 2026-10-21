@@ -3,21 +3,21 @@
 
 #include <string>
 #include "categoria.hpp"
-#include "transacao.hpp"
+#include "lancamentos.hpp"
 
 /**
 * @brief Classe responsável pelo controle de limite de gastos por categoria e período.
 *
-* Acumula os valores de transações/despesas registradas para verificar se o limite foi atingido.
+* Acumula os valores de lançamentos/despesas registrados para verificar se o limite foi atingido.
  */
- class Orcamento {
+class Orcamento {
 private:
     double limite_;
     double valorGasto_;
     Categoria* categoria_;
     int mes_;
     int ano_;
-    
+
 public:
     /**
     * @brief Construtor de orcamento.
@@ -34,23 +34,27 @@ public:
     ~Orcamento() = default;
 
     /**
-    * @brief Adiciona uma transação no total do orçamento.
-    * @param transacao Ponteiro para a transação.
+    * @brief Adiciona um lançamento no total do orçamento.
+    *
+    * Só entra na soma se for uma despesa da mesma categoria do orçamento
+    * e do mesmo mês e ano. Receitas e lançamentos de outras categorias
+    * ou períodos são ignorados.
+    * @param lancamento Ponteiro para o lançamento.
     */
-    void adicionarTransacao(Transacao* transacao);
-    
+    void adicionarLancamento(Lancamentos* lancamento);
+
     /**
     * @brief Verifica se foi ultrapassado o limite para o orçamento.
     * @return true se valorGasto > limite, falso senão.
     */
     bool estourouLimite() const;
-    
+
     /**
     * @brief Calcula o saldo disponível conforme o orçamento.
     * @return Valor restante de saldo.
     */
     double getSaldoRestante() const;
-    
+
     /**
     * @brief Atualiza o limite para o orçamento.
     * @param novoLimite Novo teto.
@@ -86,5 +90,6 @@ public:
      * @return Ano correspondente.
      */
     int getAno() const;
- };
- #endif
+};
+
+#endif
