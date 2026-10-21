@@ -5,11 +5,12 @@
 #include "transacao.hpp"
 #include "categoria.hpp"
 #include "lancamentos.hpp"
+#include "conta.hpp"
 #include "receita.hpp"
 
        
     //Construtor para receitas fixas
-    Receita:: Receita(const double valorDaReceita, Categoria* categoriaDaReceita, std::year_month_day dataDaReceita, Conta* contaDaReceita, bool ehfixo){
+    Receita:: Receita(const double valorDaReceita, Categoria* categoriaDaReceita, std:: chrono:: year_month_day dataDaReceita, Conta* contaDaReceita, bool ehfixo){
         valor = valorDaReceita;
         categoria = categoriaDaReceita;
         data = dataDaReceita;
@@ -18,10 +19,9 @@
         LancamentoFixo = ehfixo;
     }
     
-    //Construtor para despesas nao fixas    
-     Receita::~Receita() = default;
-
     //Instancia novo objeto de lancamento de  
      void Receita:: addLancamentosFuturos(){
-        conta->addLancamento(this);
+        if(conta!=nullptr){
+            conta->addLancamento(this);
+        }
      };

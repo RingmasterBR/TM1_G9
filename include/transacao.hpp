@@ -13,7 +13,7 @@ public:
 
     Transacao(Conta* contaTransacao, double valorTransacao);
     virtual ~Transacao();
-    Conta getConta() const;
+    Conta* getConta() const;
     double getSaldoFinal() const;
     double getDividaFinal() const;
     double getSaldoAnterior() const;
@@ -32,7 +32,7 @@ protected:
     double dividaAnterior;   /**< Armazena a divida historica pre-transacao. */
 
     //Percorre vetor de lançamento de conta e recalcula, atualiza saldo e divida Final da propria transacao. 
-    double updateSaldoEDivida();    
+    void updateSaldoEDivida();    
 };
 
 #endif

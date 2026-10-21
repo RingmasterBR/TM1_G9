@@ -2,8 +2,6 @@
 #include <list>
 #include <string>
 
-#include "usuario.hpp"
-#include "lancamentos.hpp"
 #include "transacao.hpp"
 #include "conta.hpp"
 

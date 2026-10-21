@@ -18,10 +18,10 @@ class Conta {
         double divida; 
         void setSaldo(); 
         void setDivida(); 
-        std::list<Lancamentos*> lancamentosFuturos; 
-        std::list<Transacao*> listaTransacao; 
 
     public :
+        std::list<Lancamentos*> lancamentosFuturos; 
+        std::list<Transacao*> listaTransacao; 
         std::string NomeDaConta;
 
         void addLancamento(Lancamentos* lancamento);
@@ -31,7 +31,8 @@ class Conta {
         Conta(Usuario* usuario, std::string nomeDaContaAtual); 
 
         double getSaldo();
-        double getDivida();   
+        double getDivida(); 
+
 };
  
 #endif
