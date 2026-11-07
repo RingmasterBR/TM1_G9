@@ -40,7 +40,7 @@ public:
      * se algum deles estourou o limite.
      * @param lancamento Ponteiro para o lançamento (Despesa ou Receita) a ser registrado.
      */
-    void registrarLancamento(Lancamentos* lancamento);
+    //void registrarLancamento(Lancamentos* lancamento);
 
     /**
      * @brief Adiciona um novo orçamento à gestão do usuário.

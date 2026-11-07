@@ -6,7 +6,9 @@
 #include "conta.hpp"
 
 // Construtor usando a lista de inicialização
-Usuario::Usuario(std::string nomeUsuario, int idUsuario, std::string senhaUsuario): nome(nomeUsuario), id(idUsuario), senha(senhaUsuario) {} 
+Usuario::Usuario(std::string nomeUsuario, int idUsuario, std::string senhaUsuario): nome(nomeUsuario), id(idUsuario), senha(senhaUsuario) {
+     gerenciadorFinanceiro = new GerenciadorFinanceiro(this);
+} 
 
 int Usuario::getUserId() {
     return id;
@@ -14,6 +16,10 @@ int Usuario::getUserId() {
 
 std::string Usuario::getName() {
     return nome;
+}
+
+GerenciadorFinanceiro* Usuario::getGerenciadorFinanceiro(){
+    return gerenciadorFinanceiro;
 }
 
 // Percorre a lista de contas do usuário para verificar duplicidade e criar nova conta
