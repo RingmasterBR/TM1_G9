@@ -250,16 +250,16 @@ static Conta* garantirConta(Usuario* usuario) {
 static void criarOrcamento(Usuario* usuario) {
     std::cout << "\n--- Novo orcamento ---\n";
     double limite = lerDouble("Limite (R$): ");
-    if (limite <= 0) {
+    while (limite <= 0) {
         std::cout << "O limite precisa ser maior que zero.\n";
-        return;
+        limite = lerDouble("Limite (R$): ");
     }
     Categoria* categoria = escolherCategoria();
     int mes = lerInt("Mes (1-12): ");
     int ano = lerInt("Ano: ");
-    if (mes < 1 || mes > 12) {
+    while (mes < 1 || mes > 12) {
         std::cout << "Mes invalido.\n";
-        return;
+        mes = lerInt("Mes (1-12): ");
     }
 
     Orcamento* orcamento = new Orcamento(limite, categoria, mes, ano);
@@ -272,15 +272,15 @@ static void criarOrcamento(Usuario* usuario) {
 static void realizarTransacao(Usuario* usuario, Conta* conta) {
     std::cout << "\n--- Nova transacao ---\n";
     int tipo = lerInt("1 = Despesa, 2 = Receita: ");
-    if (tipo != 1 && tipo != 2) {
+    while (tipo != 1 && tipo != 2) {
         std::cout << "Tipo invalido.\n";
-        return;
+        tipo = lerInt("1 = Despesa, 2 = Receita: ");
     }
 
     double valor = lerDouble("Valor (R$): ");
-    if (valor <= 0) {
+    while (valor <= 0) {
         std::cout << "O valor precisa ser maior que zero.\n";
-        return;
+        valor = lerDouble("Valor (R$): ");
     }
 
     Categoria* categoria = escolherCategoria();
