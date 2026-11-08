@@ -23,7 +23,7 @@
 // TipoGasto e FormaPagamento do seu categoria.hpp (o numero escolhido e
 // convertido direto para o enum com static_cast).
 static const std::vector<std::string> ROTULOS_TIPO_GASTO = {
-    "Alimentacao", "Transporte", "Lazer", "Outros"};
+    "Alimentacao", "Transporte", "Lazer", "Saude", "Educacao", "Outros"};
 static const std::vector<std::string> ROTULOS_FORMA_PAGAMENTO = {
     "Credito", "Debito", "Pix"};
 
@@ -34,6 +34,30 @@ static int proximoIdUsuario = 1;
 // O Orcamento compara Categoria* por ponteiro, entao a mesma combinacao
 // tipo+forma tem que reutilizar o MESMO objeto Categoria.
 static std::map<std::pair<int, int>, Categoria*> categorias;
+
+// Lancamentos e orcamentos criados com new. As classes so guardam ponteiros
+// para eles (nao sao donas), entao o main guarda aqui para liberar no final.
+static std::vector<Lancamentos*> lancamentos;
+static std::vector<Orcamento*> orcamentos;
+
+// ========================== Liberacao de memoria ===========================
+// Registrada com std::atexit no inicio do main: roda tanto no "return 0"
+// quanto no std::exit(0) (fim da entrada).
+// Cada Usuario libera suas Contas e seu GerenciadorFinanceiro, e cada Conta
+// libera suas Transacoes (ver os destrutores dessas classes).
+static void liberarMemoria() {
+    for (Usuario* u : usuarios) delete u;
+    usuarios.clear();
+
+    for (Lancamentos* l : lancamentos) delete l;
+    lancamentos.clear();
+
+    for (Orcamento* o : orcamentos) delete o;
+    orcamentos.clear();
+
+    for (auto& par : categorias) delete par.second;
+    categorias.clear();
+}
 
 // ============================ Entrada de dados =============================
 static void limparEntrada() {
@@ -238,8 +262,9 @@ static void criarOrcamento(Usuario* usuario) {
         return;
     }
 
-    usuario->getGerenciadorFinanceiro()->adicionarOrcamento(
-        new Orcamento(limite, categoria, mes, ano));
+    Orcamento* orcamento = new Orcamento(limite, categoria, mes, ano);
+    orcamentos.push_back(orcamento);  // liberado em liberarMemoria()
+    usuario->getGerenciadorFinanceiro()->adicionarOrcamento(orcamento);
     std::cout << "Orcamento cadastrado.\n";
 }
 
@@ -268,6 +293,7 @@ static void realizarTransacao(Usuario* usuario, Conta* conta) {
     } else {
         lancamento = new Receita(valor, categoria, data, conta, fixo);
     }
+    lancamentos.push_back(lancamento);  // liberado em liberarMemoria()
 
     lancamento->addLancamentosFuturos();  // entra na lista de lancamentos da Conta
     lancamento->realizarTransacao();      // cria a Transacao da Conta
@@ -325,6 +351,8 @@ static void sessao(Usuario* usuario) {
 
 // ================================= main ====================================
 int main() {
+    std::atexit(liberarMemoria);
+
     while (true) {
         std::cout << "\n===== Gerenciador Financeiro =====\n"
                   << "1) Cadastrar\n"
