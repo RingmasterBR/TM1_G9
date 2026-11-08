@@ -9,19 +9,20 @@ Usuario* GerenciadorFinanceiro::getUsuario() {
     return usuario_;
 }
 
-// Fluxo principal do sistema: registrar um lancamento (despesa ou receita).
-// O gerenciador nao calcula nada sozinho, ele so chama:
-//   1. a Conta atualiza saldo e divida
-//   2. cada Orcamento decide se o lancamento conta para ele
-//   3. verifica se algum orcamento estourou o limite
-
-/*void GerenciadorFinanceiro::registrarLancamento(Lancamentos* lancamento) {
-    if (lancamento == nullptr || lancamento->conta == nullptr) {
+// Registra um lancamento (despesa ou receita) nos orcamentos.
+// O saldo da conta ja foi atualizado pelo proprio lancamento
+// (addLancamentosFuturos + realizarTransacao). Aqui:
+//   1. cada Orcamento decide se o lancamento conta para ele
+//   2. verifica se algum orcamento estourou o limite
+void GerenciadorFinanceiro::registrarLancamento(Lancamentos* lancamento) {
+    if (lancamento == nullptr) {
         return;
     }
-    this->usuario_->addOrcamento(orcamento);
+    for (size_t i = 0; i < orcamentos_.size(); i++) {
+        orcamentos_[i]->adicionarLancamento(lancamento);
+    }
     verificarOrcamentos();
-}*/
+}
 
 // Cadastra um orcamento na lista, ignorando ponteiro nulo.
 void GerenciadorFinanceiro::adicionarOrcamento(Orcamento* orcamento) {
@@ -38,11 +39,11 @@ void GerenciadorFinanceiro::verificarOrcamentos() {
         Orcamento* orcamento = orcamentos_[i];
 
         if (orcamento->estourouLimite()) {
-            std::cout << "ALERTA: orcamento!";
-            /*if (orcamento->getCategoria() != nullptr) {
+            std::cout << "ALERTA: orcamento";
+            if (orcamento->getCategoria() != nullptr) {
                 std::cout << " de " << orcamento->getCategoria()->getNome();
-            }*/
-            std::cout << " Estourou o limite de R$ " << orcamento->getLimite() << std::endl;
+            }
+            std::cout << " estourou o limite de R$ " << orcamento->getLimite() << std::endl;
         }
     }
 }
@@ -61,7 +62,7 @@ void GerenciadorFinanceiro::gerarRelatorioMensal(int mes, int ano) {
         if (orcamento->getMes() == mes && orcamento->getAno() == ano) {
             encontrados++;
             if (orcamento->getCategoria() != nullptr) {
-                std::cout << "Tipo de gasto: " << orcamento->getCategoria()->getTipo() << " Forma de pagamento: " << orcamento->getCategoria()->getFormaPagamento() << "." ;
+                std::cout << "Categoria: " << orcamento->getCategoria()->getNome();
             } else {
                 std::cout << "Sem categoria";
             }
@@ -93,7 +94,7 @@ void GerenciadorFinanceiro::salvarDados(std::string arquivo) {
         Orcamento* orcamento = orcamentos_[i];
         std::string nomeCategoria = "";
         if (orcamento->getCategoria() != nullptr) {
-            nomeCategoria = orcamento->getCategoria()->getTipo();
+            nomeCategoria = orcamento->getCategoria()->getNome();
         }
 
         saida << "ORCAMENTO;" << nomeCategoria << ";" << orcamento->getLimite() << ";"

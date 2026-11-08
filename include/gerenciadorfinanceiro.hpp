@@ -36,11 +36,12 @@ public:
     /**
      * @brief Registra um lançamento na conta indicada pelo próprio lançamento.
      *
-     * Atualiza a conta, repassa o lançamento aos orçamentos e verifica
-     * se algum deles estourou o limite.
+     * Repassa o lançamento aos orçamentos e verifica se algum deles
+     * estourou o limite. O saldo da conta é atualizado antes, pelo próprio
+     * lançamento (addLancamentosFuturos + realizarTransacao).
      * @param lancamento Ponteiro para o lançamento (Despesa ou Receita) a ser registrado.
      */
-    //void registrarLancamento(Lancamentos* lancamento);
+    void registrarLancamento(Lancamentos* lancamento);
 
     /**
      * @brief Adiciona um novo orçamento à gestão do usuário.
