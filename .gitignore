@@ -1,2 +1,9 @@
 html/
 latex/
+obj/*
+!obj/.gitkeep
+bin/*
+!bin/.gitkeep
+*.gcda
+*.gcno
+*.gcov

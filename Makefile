@@ -1,82 +1,45 @@
 CXX = g++
 CFLAGS = -std=c++20 -Wall -Wextra --coverage -Iinclude -Itests -O0
 
-SRC_DIR = src
-INC_DIR = include
-TEST_DIR = tests
-OBJ_DIR = obj
-BIN_DIR = bin
+# Arquivos objeto das classes do sistema
+OBJS = obj/usuario.o obj/conta.o obj/categoria.o obj/lancamentos.o \
+       obj/despesa.o obj/receita.o obj/transacao.o obj/orcamento.o \
+       obj/gerenciadorfinanceiro.o
+
+# Arquivos objeto dos testes
+TEST_OBJS = obj/main_test.o obj/test_usuario.o obj/test_conta.o \
+            obj/test_categoria.o obj/test_lancamentos.o obj/test_despesa.o \
+            obj/test_receita.o obj/test_transacao.o obj/test_orcamento.o \
+            obj/test_gerenciadorfinanceiro.o
 
 all: sistema
 
-$(BIN_DIR):
-	if not exist $(BIN_DIR) mkdir $(BIN_DIR)
+# --- Sistema principal ---
+sistema: $(OBJS) obj/main.o
+	$(CXX) $(CFLAGS) $(OBJS) obj/main.o -o bin/sistema
 
-$(OBJ_DIR):
-	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
+run: sistema
+	./bin/sistema
 
-# --- Compilação das classes ---
-$(OBJ_DIR)/usuario.o: $(SRC_DIR)/usuario.cpp $(INC_DIR)/usuario.hpp | $(OBJ_DIR)
-	$(CXX) $(CFLAGS) -c $(SRC_DIR)/usuario.cpp -o $@
+# --- Testes ---
+tests: $(OBJS) $(TEST_OBJS)
+	$(CXX) $(CFLAGS) $(OBJS) $(TEST_OBJS) -o bin/exec_tests
 
-$(OBJ_DIR)/conta.o: $(SRC_DIR)/conta.cpp $(INC_DIR)/conta.hpp $(INC_DIR)/usuario.hpp | $(OBJ_DIR)
-	$(CXX) $(CFLAGS) -c $(SRC_DIR)/conta.cpp -o $@
+run_tests: tests
+	./bin/exec_tests
 
-$(OBJ_DIR)/categoria.o: $(SRC_DIR)/categoria.cpp $(INC_DIR)/categoria.hpp | $(OBJ_DIR)
-	$(CXX) $(CFLAGS) -c $(SRC_DIR)/categoria.cpp -o $@
+# --- Regras de compilacao ---
+# $< e o arquivo .cpp e $@ e o arquivo .o que sera gerado
+obj/%.o: src/%.cpp include/*.hpp
+	$(CXX) $(CFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/lancamentos.o: $(SRC_DIR)/lancamentos.cpp $(INC_DIR)/lancamentos.hpp $(INC_DIR)/categoria.hpp $(INC_DIR)/conta.hpp $(INC_DIR)/transacao.hpp | $(OBJ_DIR)
-	$(CXX) $(CFLAGS) -c $(SRC_DIR)/lancamentos.cpp -o $@
+obj/%.o: tests/%.cpp include/*.hpp
+	$(CXX) $(CFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/despesa.o: $(SRC_DIR)/despesa.cpp $(INC_DIR)/despesa.hpp $(INC_DIR)/transacao.hpp $(INC_DIR)/categoria.hpp $(INC_DIR)/lancamentos.hpp | $(OBJ_DIR)
-	$(CXX) $(CFLAGS) -c $(SRC_DIR)/despesa.cpp -o $@
+# --- Documentacao ---
+documentation:
+	doxygen Doxyfile
 
-$(OBJ_DIR)/receita.o: $(SRC_DIR)/receita.cpp $(INC_DIR)/receita.hpp $(INC_DIR)/transacao.hpp $(INC_DIR)/categoria.hpp $(INC_DIR)/lancamentos.hpp | $(OBJ_DIR)
-	$(CXX) $(CFLAGS) -c $(SRC_DIR)/receita.cpp -o $@
-
-$(OBJ_DIR)/transacao.o: $(SRC_DIR)/transacao.cpp $(INC_DIR)/transacao.hpp $(INC_DIR)/conta.hpp $(INC_DIR)/lancamentos.hpp | $(OBJ_DIR)
-	$(CXX) $(CFLAGS) -c $(SRC_DIR)/transacao.cpp -o $@
-
-# --- Compilação opcional do sistema principal ---
-sistema: $(OBJ_DIR)/usuario.o $(OBJ_DIR)/conta.o $(OBJ_DIR)/transacao.o $(BIN_DIR)
-	@echo "Compilação do sistema principal omitida ou parcial devido a módulos pendentes."
-
-# --- Compilação e Execução dos Testes Unitários ---
-$(OBJ_DIR)/main_test.o: $(TEST_DIR)/main_test.cpp $(TEST_DIR)/doctest.h | $(OBJ_DIR)
-	$(CXX) $(CFLAGS) -c $(TEST_DIR)/main_test.cpp -o $@
-
-$(OBJ_DIR)/test_usuario.o: $(TEST_DIR)/test_usuario.cpp $(INC_DIR)/usuario.hpp $(TEST_DIR)/doctest.h | $(OBJ_DIR)
-	$(CXX) $(CFLAGS) -c $(TEST_DIR)/test_usuario.cpp -o $@
-
-$(OBJ_DIR)/test_conta.o: $(TEST_DIR)/test_conta.cpp $(INC_DIR)/conta.hpp $(TEST_DIR)/doctest.h | $(OBJ_DIR)
-	$(CXX) $(CFLAGS) -c $(TEST_DIR)/test_conta.cpp -o $@
-
-$(OBJ_DIR)/test_lancamentos.o: $(TEST_DIR)/test_lancamentos.cpp $(INC_DIR)/lancamentos.hpp $(TEST_DIR)/doctest.h | $(OBJ_DIR)
-	$(CXX) $(CFLAGS) -c $(TEST_DIR)/test_lancamentos.cpp -o $@
-
-$(OBJ_DIR)/test_despesa.o: $(TEST_DIR)/test_despesa.cpp $(INC_DIR)/despesa.hpp $(TEST_DIR)/doctest.h | $(OBJ_DIR)
-	$(CXX) $(CFLAGS) -c $(TEST_DIR)/test_despesa.cpp -o $@
-
-$(OBJ_DIR)/test_receita.o: $(TEST_DIR)/test_receita.cpp $(INC_DIR)/receita.hpp $(TEST_DIR)/doctest.h | $(OBJ_DIR)
-	$(CXX) $(CFLAGS) -c $(TEST_DIR)/test_receita.cpp -o $@
-
-$(OBJ_DIR)/test_transacao.o: $(TEST_DIR)/test_transacao.cpp $(INC_DIR)/transacao.hpp $(TEST_DIR)/doctest.h | $(OBJ_DIR)
-	$(CXX) $(CFLAGS) -c $(TEST_DIR)/test_transacao.cpp -o $@
-
-# Alvo unificado
-test: $(OBJ_DIR)/main_test.o $(OBJ_DIR)/test_usuario.o $(OBJ_DIR)/test_conta.o $(OBJ_DIR)/test_lancamentos.o $(OBJ_DIR)/test_despesa.o $(OBJ_DIR)/test_receita.o $(OBJ_DIR)/test_transacao.o $(OBJ_DIR)/usuario.o $(OBJ_DIR)/conta.o $(OBJ_DIR)/categoria.o $(OBJ_DIR)/lancamentos.o $(OBJ_DIR)/despesa.o $(OBJ_DIR)/receita.o $(OBJ_DIR)/transacao.o $(BIN_DIR)
-	$(CXX) $(CFLAGS) $(OBJ_DIR)/main_test.o $(OBJ_DIR)/test_usuario.o $(OBJ_DIR)/test_conta.o $(OBJ_DIR)/test_lancamentos.o $(OBJ_DIR)/test_despesa.o $(OBJ_DIR)/test_receita.o $(OBJ_DIR)/test_transacao.o $(OBJ_DIR)/usuario.o $(OBJ_DIR)/conta.o $(OBJ_DIR)/categoria.o $(OBJ_DIR)/lancamentos.o $(OBJ_DIR)/despesa.o $(OBJ_DIR)/receita.o $(OBJ_DIR)/transacao.o -o $(BIN_DIR)/exec_tests
-	./$(BIN_DIR)/exec_tests
-
-# Relatório de cobertura de código
-coverage: test
-	gcovr --root . --txt --print-summary
-	gcovr --root . --html --html-details -o $(BIN_DIR)/cobertura.html
-
-# Limpeza completa compatível com Windows
+# --- Limpeza ---
 clean:
-	if exist obj rmdir /s /q obj
-	if exist bin rmdir /s /q bin
-	if exist *.gcda del /f /q *.gcda
-	if exist *.gcno del /f /q *.gcno
-	if exist *.gcov del /f /q *.gcov
+	rm -f obj/*.o obj/*.gcda obj/*.gcno bin/sistema bin/exec_tests bin/*.exe
