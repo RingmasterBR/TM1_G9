@@ -15,18 +15,21 @@ class Conta;
 class Lancamentos {
 public:
     //Atributos:
-    double valor;
-    Categoria* categoria;
-    std::chrono::year_month_day data;
-    Conta* conta;
+    double valor = 0.0;
+    Categoria* categoria = nullptr;
+    std::chrono::year_month_day data{};
+    Conta* conta = nullptr;
     enum tipoLancamento {TipoReceita, TipoDespesa};
-    tipoLancamento tipo;
-    bool LancamentoFixo;
+    tipoLancamento tipo = TipoDespesa;
+    bool LancamentoFixo = false;
+    bool processado = false; // true depois que o lancamento ja afetou saldo/divida
 
     virtual ~Lancamentos() = default;
-    
 
-private:
+    //Adiciona o lancamento na lista de lancamentos da conta
+    virtual void addLancamentosFuturos();
+
+    //Cria a transacao que aplica os lancamentos pendentes da conta no saldo/divida
     void realizarTransacao();
 
 };

@@ -25,6 +25,7 @@ void Orcamento::adicionarLancamento(Lancamentos* lancamento) {
     int mesDoLancamento = static_cast<int>(static_cast<unsigned>(lancamento->data.month()));
     int anoDoLancamento = static_cast<int>(lancamento->data.year());
     if (mesDoLancamento != mes_ || anoDoLancamento != ano_) {
+        return;
     }
     valorGasto_ += lancamento->valor;
 }
@@ -61,4 +62,4 @@ int Orcamento::getMes() const {
 
 int Orcamento::getAno() const {
     return ano_;
-}
+}

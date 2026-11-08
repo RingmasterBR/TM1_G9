@@ -24,7 +24,7 @@ public:
     bool isFixa() const;
 
     //Instancia novo objeto de lancamento de  
-    void addLancamentosFuturos();
+    void addLancamentosFuturos() override;
 };
 
 #endif

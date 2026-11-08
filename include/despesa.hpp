@@ -21,7 +21,7 @@ public:
     ~Despesa() = default;
 
     //Instancia novo objeto de lancamento de  
-    void addLancamentosFuturos();
+    void addLancamentosFuturos() override;
 };
 
 #endif

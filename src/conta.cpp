@@ -12,6 +12,13 @@ Conta::Conta(Usuario* usuario, std::string nomeDaContaAtual)
     divida(0.0), 
     NomeDaConta(nomeDaContaAtual) {}
 
+// Desaloca as transacoes registradas na conta
+Conta::~Conta() {
+    for (Transacao* t : listaTransacao) {
+        delete t;
+    }
+}
+
 void Conta::setSaldo() {
     if (!listaTransacao.empty()) {
         saldo = listaTransacao.back()->getSaldoFinal();
@@ -25,6 +32,9 @@ void Conta::setDivida() {
 }
 
 void Conta::addLancamento(Lancamentos* lancamento) { 
+    if (lancamento == nullptr) {
+        return;
+    }
     lancamentosFuturos.push_back(lancamento);
 }
 
@@ -40,4 +50,4 @@ double Conta::getSaldo() {
 
 double Conta::getDivida() {
     return divida;
-}
+}

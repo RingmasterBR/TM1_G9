@@ -21,7 +21,8 @@ public:
     int ValidarDados();
 
  //Adiciona a transacao atual na lista de transacao da classe conta toda vez que um objeto transacao eh criado.    
-    void updateListaTransacao();
+    // Retorna true se a transacao foi adicionada a conta.
+    bool updateListaTransacao();
 
 protected:
     Conta* conta;            /**< Conta associada. */

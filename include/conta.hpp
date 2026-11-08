@@ -29,6 +29,11 @@ class Conta {
 
         // Construtor atualizado para receber também o ponteiro do usuário e o nome da conta
         Conta(Usuario* usuario, std::string nomeDaContaAtual); 
+        ~Conta();
+
+        // Conta e dona das transacoes (desaloca no destrutor), entao nao pode ser copiada
+        Conta(const Conta&) = delete;
+        Conta& operator=(const Conta&) = delete;
 
         double getSaldo();
         double getDivida(); 
