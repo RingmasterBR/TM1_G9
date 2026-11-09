@@ -1,27 +1,23 @@
-#include <string>
-#include <chrono>
-#include <list>
-
-#include "transacao.hpp"
-#include "categoria.hpp"
-#include "lancamentos.hpp"
-#include "conta.hpp"
 #include "receita.hpp"
 
-       
-    //Construtor para receitas fixas
-    Receita:: Receita(const double valorDaReceita, Categoria* categoriaDaReceita, std:: chrono:: year_month_day dataDaReceita, Conta* contaDaReceita, bool ehfixo){
-        valor = valorDaReceita;
-        categoria = categoriaDaReceita;
-        data = dataDaReceita;
-        conta = contaDaReceita;
-        tipo = TipoReceita;
-        LancamentoFixo = ehfixo;
+Receita::Receita(double valor, Categoria* categoria, std::chrono::year_month_day data,
+                 Conta* conta, bool fixo)
+    : Lancamentos(valor, categoria, data, conta, fixo) {}
+
+// Receita so entra no saldo quando a data chega; antes disso fica pendente.
+bool Receita::aplicarEfeito(double& saldo, double& /*divida*/,
+                            std::chrono::year_month_day hoje) const {
+    if (data_ > hoje) {
+        return false;
     }
-    
-    //Instancia novo objeto de lancamento de  
-     void Receita:: addLancamentosFuturos(){
-        if(conta!=nullptr){
-            conta->addLancamento(this);
-        }
-     };
+    saldo += valor_;
+    return true;
+}
+
+bool Receita::isDespesa() const {
+    return false;
+}
+
+std::string Receita::getTipoTexto() const {
+    return "Receita";
+}

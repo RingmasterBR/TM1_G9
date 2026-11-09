@@ -1,82 +1,67 @@
-
-// Inclusões próprias do C++
-#include <iostream>
-#include <string>
-#include<list>
-#include <chrono>
-
 #include "transacao.hpp"
+
+#include <chrono>
+#include <stdexcept>
+
 #include "conta.hpp"
 #include "lancamentos.hpp"
 
-    Transacao::Transacao(Conta* contaTransacao, double valorTransacao){
-        conta = contaTransacao;
-        valor = valorTransacao;
-        saldoFinal = contaTransacao->getSaldo();        
-        dividaFinal = contaTransacao->getDivida();      
-        saldoAnterior = contaTransacao->getSaldo();   
-        dividaAnterior= contaTransacao->getDivida();     
-        updateSaldoEDivida();
-    };
+Transacao::Transacao(Conta* conta, double valor)
+    : conta_(conta), valor_(valor) {
+    if (conta == nullptr) {
+        throw std::invalid_argument("A transacao precisa de uma conta.");
+    }
+    saldoAnterior_ = conta->getSaldo();
+    dividaAnterior_ = conta->getDivida();
+    saldoFinal_ = saldoAnterior_;
+    dividaFinal_ = dividaAnterior_;
+    calcularSaldoEDivida();
+}
 
-    Transacao::~Transacao() = default;
+// Percorre os lancamentos da conta e aplica os que ainda nao foram processados.
+// O efeito de cada um e decidido pela propria subclasse (polimorfismo).
+void Transacao::calcularSaldoEDivida() {
+    using namespace std::chrono;
+    year_month_day hoje = floor<days>(system_clock::now());
 
-    Conta* Transacao::getConta() const{
-        return conta;
-    }
-    double Transacao:: getSaldoFinal() const{
-        return saldoFinal;
-    }
-    double Transacao:: getDividaFinal() const{
-        return dividaFinal;
-    }
-    double Transacao:: getSaldoAnterior() const{
-        return saldoAnterior;
-    }
-    
-    double Transacao:: getDividaAnterior() const{
-        return dividaAnterior;
-    }
-    
-    int Transacao:: ValidarDados(){
-        if (valor <= 0) {
-        return 0; // Inválido
+    for (Lancamentos* lancamento : conta_->getLancamentos()) {
+        if (lancamento->isProcessado()) {
+            continue;
         }
-        return 1; // Válido
-    }        
-
-    //Percorre vetor de lançamento de conta e recalcula, atualiza saldo e divida Final da propria transacao. 
-    void Transacao :: updateSaldoEDivida(){
-        using namespace std::chrono;
-        std::chrono::year_month_day hoje = floor<days>(system_clock::now());
-
-        for(auto it = conta->lancamentosFuturos.begin(); it != conta-> lancamentosFuturos.end();){
-            Lancamentos* l = *it;
-            if (!l->processado) {
-                // Acumula (+=/-=) para considerar todos os lancamentos pendentes
-                if (l-> tipo == Lancamentos::TipoDespesa && l-> data > hoje){
-                    dividaFinal += l-> valor;
-                }else if(l-> tipo == Lancamentos::TipoDespesa){
-                    saldoFinal -= l-> valor;
-                }else if (l-> tipo == Lancamentos::TipoReceita && l-> data <= hoje){
-                    saldoFinal += l-> valor;
-                }
-                l->processado = true;
-            }
-            if(!l->LancamentoFixo){
-                it = conta->lancamentosFuturos.erase(it); // erase devolve o proximo
-            }else{
-                ++it;
-            }
+        if (lancamento->aplicarEfeito(saldoFinal_, dividaFinal_, hoje)) {
+            lancamento->marcarProcessado();
         }
-    } 
-    
-    //Adiciona a transacao atual na lista de transacao da classe conta toda vez que um objeto transacao eh criado.    
-    bool Transacao::updateListaTransacao(){
-        if(saldoFinal != saldoAnterior || dividaFinal != dividaAnterior){
-            conta-> addTransacao(this);
-            return true;
-        }
-        return false;
-    }   
+    }
+}
 
+bool Transacao::registrarNaConta() {
+    if (saldoFinal_ != saldoAnterior_ || dividaFinal_ != dividaAnterior_) {
+        conta_->addTransacao(this);
+        return true;
+    }
+    return false;
+}
+
+Conta* Transacao::getConta() const {
+    return conta_;
+}
+
+double Transacao::getValor() const {
+    return valor_;
+}
+
+double Transacao::getSaldoAnterior() const {
+    return saldoAnterior_;
+}
+
+double Transacao::getDividaAnterior() const {
+    return dividaAnterior_;
+}
+
+double Transacao::getSaldoFinal() const {
+    return saldoFinal_;
+}
+
+double Transacao::getDividaFinal() const {
+    return dividaFinal_;
+}

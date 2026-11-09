@@ -1,28 +1,24 @@
-#include <string>
-#include <chrono>
-#include <list>
-
-#include "transacao.hpp"
-#include "categoria.hpp"
-#include "lancamentos.hpp"
-#include "conta.hpp"
 #include "despesa.hpp"
 
-       
-    //Construtor para despesas 
-    Despesa:: Despesa(const double valordaDespesa, Categoria* categoriadaDespesa, std::chrono::year_month_day dataDaDespesa, Conta* contaDaDespesa, bool ehfixo){
-        valor = valordaDespesa;
-        categoria = categoriadaDespesa;
-        data = dataDaDespesa;
-        conta = contaDaDespesa;
-        tipo = TipoDespesa;
-        LancamentoFixo = ehfixo;
-    }
-    
+Despesa::Despesa(double valor, Categoria* categoria, std::chrono::year_month_day data,
+                 Conta* conta, bool fixo)
+    : Lancamentos(valor, categoria, data, conta, fixo) {}
 
-    //Instancia novo objeto de lancamento de  
-    void Despesa:: addLancamentosFuturos(){
-        if(conta!= nullptr){
-            conta->addLancamento(this);
-        }
-     };
+// Despesa ate hoje sai do saldo; despesa futura vira divida.
+bool Despesa::aplicarEfeito(double& saldo, double& divida,
+                            std::chrono::year_month_day hoje) const {
+    if (data_ > hoje) {
+        divida += valor_;
+    } else {
+        saldo -= valor_;
+    }
+    return true;
+}
+
+bool Despesa::isDespesa() const {
+    return true;
+}
+
+std::string Despesa::getTipoTexto() const {
+    return "Despesa";
+}
