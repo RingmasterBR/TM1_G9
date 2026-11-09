@@ -145,8 +145,7 @@ std::chrono::year_month_day InterfaceTerminal::lerData() {
     }
 }
 
-int InterfaceTerminal::escolherOpcao(const std::string& titulo,
-                                     const std::vector<std::string>& rotulos) {
+int InterfaceTerminal::escolherOpcao(const std::string& titulo, const std::vector<std::string>& rotulos) {
     out_ << titulo << "\n";
     for (size_t i = 0; i < rotulos.size(); i++) {
         out_ << "  " << i + 1 << ") " << rotulos[i] << "\n";
@@ -164,8 +163,7 @@ Categoria* InterfaceTerminal::escolherCategoria() {
     if (encontrada != categorias_.end()) {
         return encontrada->second;
     }
-    Categoria* nova = new Categoria(static_cast<TipoGasto>(tipo),
-                                    static_cast<FormaPagamento>(forma));
+    Categoria* nova = new Categoria(static_cast<TipoGasto>(tipo), static_cast<FormaPagamento>(forma));
     categorias_[chave] = nova;
     return nova;
 }
@@ -250,9 +248,10 @@ void InterfaceTerminal::criarOrcamento(Usuario* usuario) {
     int ano = lerIntEntre("Ano: ", 1900, 2100);
 
     GerenciadorFinanceiro* gerenciador = usuario->getGerenciadorFinanceiro();
+    
+    //verifica se o orcamento digitado ja e existente
     for (const Orcamento* existente : gerenciador->getOrcamentos()) {
-        if (existente->getCategoria()->getTipo() == categoria->getTipo() &&
-            existente->getMes() == mes && existente->getAno() == ano) {
+        if (existente->getCategoria()->getTipo() == categoria->getTipo() && existente->getMes() == mes && existente->getAno() == ano) {
             out_ << "Ja existe um orcamento de " << categoria->getNome() << " para "
                  << mes << "/" << ano << ".\n";
             return;
@@ -282,6 +281,7 @@ void InterfaceTerminal::registrarTransacao(Usuario* usuario, Conta* conta) {
     bool fixo = perguntarSimNao("O lancamento e fixo/recorrente?");
 
     Lancamentos* lancamento = nullptr;
+
     if (tipo == 1) {
         lancamento = new Despesa(valor, categoria, data, conta, fixo);
     } else {
@@ -292,6 +292,9 @@ void InterfaceTerminal::registrarTransacao(Usuario* usuario, Conta* conta) {
     usuario->getGerenciadorFinanceiro()->registrarLancamento(lancamento, out_);
 
     out_ << lancamento->getTipoTexto() << " registrada.\n";
+
+    //Se o lancamento possui data atual, isProcessado = true, se nao isProcessado = false
+    //Indica ao usuario se isProcessado false que o a receita entrara no saldo quando chegar a data
     if (!lancamento->isProcessado()) {
         out_ << "A receita tem data futura e entrara no saldo quando a data chegar.\n";
     }
@@ -300,6 +303,7 @@ void InterfaceTerminal::registrarTransacao(Usuario* usuario, Conta* conta) {
 }
 
 // =============================== Relatorios ================================
+//Gera relatorio do mes e ano indicado
 void InterfaceTerminal::gerarRelatorio(Usuario* usuario) {
     out_ << "\n--- Relatorio ---\n";
     int mes = lerIntEntre("Mes (1-12, 0 = mes atual): ", 0, 12);
@@ -314,6 +318,7 @@ void InterfaceTerminal::gerarRelatorio(Usuario* usuario) {
     usuario->getGerenciadorFinanceiro()->gerarRelatorioMensal(mes, ano, out_);
 }
 
+//Mostra o extrato da conta
 void InterfaceTerminal::mostrarExtrato(Conta* conta) {
     out_ << "\n--- Extrato da conta " << conta->getNome() << " ---\n";
     out_ << std::fixed << std::setprecision(2);
@@ -333,6 +338,7 @@ void InterfaceTerminal::mostrarExtrato(Conta* conta) {
     out_ << "Saldo: R$ " << conta->getSaldo() << " | Divida: R$ " << conta->getDivida() << "\n";
 }
 
+//gerenciador financeiro gera relatorio de dados do usuario em um arquivo .txt
 void InterfaceTerminal::exportarDados(Usuario* usuario) {
     std::string arquivo = lerTextoNaoVazio("Nome do arquivo (ex: dados.txt): ");
     try {
@@ -344,6 +350,7 @@ void InterfaceTerminal::exportarDados(Usuario* usuario) {
 }
 
 // ============================ Sessao do usuario ============================
+//Indica as funcionalidades da sessao atual daquele usuario.
 void InterfaceTerminal::sessao(Usuario* usuario) {
     Conta* conta = escolherConta(usuario);
     if (conta == nullptr) {
@@ -390,6 +397,7 @@ void InterfaceTerminal::sessao(Usuario* usuario) {
 }
 
 // =============================== Menu inicial ==============================
+//Execucao principal do prompt, da ao usuario a opcao de cadastrar, logar e encerrar, 
 void InterfaceTerminal::executar() {
     try {
         while (true) {

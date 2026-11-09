@@ -53,6 +53,7 @@ void Conta::addLancamento(Lancamentos* lancamento) {
     lancamentos_.push_back(lancamento);
 }
 
+//Adiciona transacao a lista de transacao e atualiza o saldo e a divida da conta
 void Conta::addTransacao(Transacao* transacao) {
     if (transacao == nullptr) {
         throw std::invalid_argument("Transacao nula.");

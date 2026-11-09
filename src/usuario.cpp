@@ -1,7 +1,5 @@
 #include "usuario.hpp"
-
 #include <stdexcept>
-
 #include "conta.hpp"
 #include "gerenciadorfinanceiro.hpp"
 
