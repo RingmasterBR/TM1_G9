@@ -155,7 +155,7 @@ int InterfaceTerminal::escolherOpcao(const std::string& titulo, const std::vecto
 
 // Reutiliza a mesma Categoria para a mesma combinacao tipo + forma.
 Categoria* InterfaceTerminal::escolherCategoria() {
-    int tipo = escolherOpcao("Tipo de gasto:", ROTULOS_TIPO_GASTO);
+    int tipo = escolherOpcao("Tipo de gasto/receita:", ROTULOS_TIPO_GASTO);
     int forma = escolherOpcao("Forma de pagamento:", ROTULOS_FORMA_PAGAMENTO);
 
     std::pair<int, int> chave{tipo, forma};
