@@ -1,38 +1,51 @@
-
 #include <chrono>
 
-#include "despesa.hpp"
+#include "doctest.h"
+#include "usuario.hpp"
 #include "conta.hpp"
 #include "categoria.hpp"
-#include "usuario.hpp"
-#include "doctest.h"
+#include "despesa.hpp"
 
+using namespace std::chrono;
 
-TEST_CASE("Testando a classe Despesa e suas operacoes") {
-    Usuario usuario("Carlos Aluguel", 303, "senha123");
-    Conta conta(&usuario, "Conta Corrente");
-    
-    // Ajuste os parâmetros de Categoria conforme o seu enum real em Categoria.hpp
-    Categoria categoria(TipoGasto::Alimentacao, FormaPagamento::Pix); 
+TEST_CASE("Despesa - construcao") {
+    Usuario usuario("Carlos", 1);
+    Conta conta(&usuario, "Corrente");
+    Categoria categoria(Alimentacao, Pix);
+    Despesa despesa(1500.0, &categoria, year(2026) / 10 / 15, &conta, true);
 
-    // Adicionado o 'std::chrono::' para o compilador encontrar o tipo correto
-    std::chrono::year_month_day dataExemplo{std::chrono::year(2026), std::chrono::month(10), std::chrono::day(15)};
+    CHECK(despesa.getValor() == 1500.0);
+    CHECK(despesa.isDespesa());
+    CHECK(despesa.isFixo());
+    CHECK(despesa.getTipoTexto() == "Despesa");
+}
 
-    SUBCASE("Construção e verificação de atributos de uma Despesa") {
-        Despesa despesa(1500.00, &categoria, dataExemplo, &conta, true);
+TEST_CASE("Despesa - data passada ou de hoje diminui o saldo") {
+    Usuario usuario("Carlos", 1);
+    Conta conta(&usuario, "Corrente");
+    Categoria categoria(Alimentacao, Pix);
+    year_month_day hoje = year(2026) / 10 / 15;
 
-        CHECK(despesa.valor == 1500.00);
-        CHECK(despesa.tipo == Lancamentos::TipoDespesa);
-        CHECK(despesa.LancamentoFixo == true);
-        CHECK(despesa.conta == &conta);
-        CHECK(despesa.categoria == &categoria);
-    }
+    Despesa passada(100.0, &categoria, year(2026) / 10 / 1, &conta, false);
+    Despesa deHoje(50.0, &categoria, hoje, &conta, false);
 
-    SUBCASE("Adicionando despesa aos lançamentos futuros da conta") {
-        Despesa despesa(350.00, &categoria, dataExemplo, &conta, false);
-        despesa.addLancamentosFuturos();
+    double saldo = 1000.0;
+    double divida = 0.0;
+    CHECK(passada.aplicarEfeito(saldo, divida, hoje));
+    CHECK(deHoje.aplicarEfeito(saldo, divida, hoje));
+    CHECK(saldo == 850.0);
+    CHECK(divida == 0.0);
+}
 
-        CHECK(despesa.valor == 350.00);
-        CHECK(despesa.LancamentoFixo == false);
-    }
+TEST_CASE("Despesa - data futura aumenta a divida") {
+    Usuario usuario("Carlos", 1);
+    Conta conta(&usuario, "Corrente");
+    Categoria categoria(Educacao, Credito);
+    Despesa futura(300.0, &categoria, year(2026) / 12 / 10, &conta, false);
+
+    double saldo = 1000.0;
+    double divida = 0.0;
+    CHECK(futura.aplicarEfeito(saldo, divida, year(2026) / 10 / 15));
+    CHECK(saldo == 1000.0);
+    CHECK(divida == 300.0);
 }

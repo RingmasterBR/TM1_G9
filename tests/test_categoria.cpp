@@ -1,35 +1,32 @@
+#include <stdexcept>
+
 #include "doctest.h"
 #include "categoria.hpp"
 
-TEST_CASE("Categoria - Criacao e getters basicos") {
-    Categoria cat("Mercado", TipoGasto::Alimentacao, FormaPagamento::Debito);
- 
-    CHECK(cat.getNome() == "Mercado");
-    CHECK(cat.getTipo() == TipoGasto::Alimentacao);
-    CHECK(cat.getFormaPagamento() == FormaPagamento::Debito);
+TEST_CASE("Categoria - criacao com nome e getters") {
+    Categoria categoria("Mercado", Alimentacao, Debito);
+
+    CHECK(categoria.getNome() == "Mercado");
+    CHECK(categoria.getTipo() == Alimentacao);
+    CHECK(categoria.getFormaPagamento() == Debito);
 }
 
-TEST_CASE("Categoria - Todos os tipos de gasto") {
-    Categoria a("A", TipoGasto::Alimentacao, FormaPagamento::Pix);
-    Categoria b("B", TipoGasto::Transporte, FormaPagamento::Pix);
-    Categoria c("C", TipoGasto::Lazer, FormaPagamento::Pix);
-    Categoria d("D", TipoGasto::Saude, FormaPagamento::Pix);
-    Categoria e("E", TipoGasto::Educacao, FormaPagamento::Pix);
-    Categoria f("F", TipoGasto::Outros, FormaPagamento::Pix);
- 
-    CHECK(a.getTipo() == TipoGasto::Alimentacao);
-    CHECK(b.getTipo() == TipoGasto::Transporte);
-    CHECK(c.getTipo() == TipoGasto::Lazer);
-    CHECK(d.getTipo() == TipoGasto::Saude);
-    CHECK(e.getTipo() == TipoGasto::Educacao);
-    CHECK(f.getTipo() == TipoGasto::Outros);
+TEST_CASE("Categoria - sem nome usa o nome do tipo de gasto") {
+    CHECK(Categoria(Alimentacao, Pix).getNome() == "Alimentacao");
+    CHECK(Categoria(Transporte, Pix).getNome() == "Transporte");
+    CHECK(Categoria(Lazer, Pix).getNome() == "Lazer");
+    CHECK(Categoria(Saude, Pix).getNome() == "Saude");
+    CHECK(Categoria(Educacao, Pix).getNome() == "Educacao");
+    CHECK(Categoria(Outros, Pix).getNome() == "Outros");
 }
-TEST_CASE("Categoria - Todas as formas de pagamento") {
-    Categoria a("A", TipoGasto::Outros, FormaPagamento::Credito);
-    Categoria b("B", TipoGasto::Outros, FormaPagamento::Debito);
-    Categoria c("C", TipoGasto::Outros, FormaPagamento::Pix);
- 
-    CHECK(a.getFormaPagamento() == FormaPagamento::Credito);
-    CHECK(b.getFormaPagamento() == FormaPagamento::Debito);
-    CHECK(c.getFormaPagamento() == FormaPagamento::Pix);
+
+TEST_CASE("Categoria - conversao de forma de pagamento para texto") {
+    CHECK(Categoria::formaParaTexto(Credito) == "Credito");
+    CHECK(Categoria::formaParaTexto(Debito) == "Debito");
+    CHECK(Categoria::formaParaTexto(Pix) == "Pix");
+}
+
+TEST_CASE("Categoria - valores fora do enum lancam excecao") {
+    CHECK_THROWS_AS(Categoria(static_cast<TipoGasto>(99), Pix), std::invalid_argument);
+    CHECK_THROWS_AS(Categoria("X", Lazer, static_cast<FormaPagamento>(-1)), std::invalid_argument);
 }

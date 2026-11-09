@@ -1,33 +1,50 @@
+#include <chrono>
+#include <stdexcept>
 
-#include "Usuario.hpp"
-#include "Conta.hpp"
-#include "Lancamentos.hpp"
 #include "doctest.h"
+#include "usuario.hpp"
+#include "conta.hpp"
+#include "categoria.hpp"
+#include "despesa.hpp"
+#include "transacao.hpp"
 
+using namespace std::chrono;
 
-TEST_CASE("Testando a classe Conta e as suas operacoes") {
-    // Instanciação prévia de um utilizador válido para associar à conta
-    Usuario usuario("Maria Souza", 202, "senhaSegura456");
+TEST_CASE("Conta - valores iniciais") {
+    Usuario usuario("Maria", 1);
+    Conta conta(&usuario, "Poupanca");
 
-    SUBCASE("Verificação do construtor e valores iniciais") {
-        Conta conta(&usuario, "Conta Poupança");
+    CHECK(conta.getNome() == "Poupanca");
+    CHECK(conta.getUsuario() == &usuario);
+    CHECK(conta.getSaldo() == 0.0);
+    CHECK(conta.getDivida() == 0.0);
+    CHECK(conta.getLancamentos().empty());
+    CHECK(conta.getTransacoes().empty());
+}
 
-        CHECK(conta.NomeDaConta == "Conta Poupança");
-        CHECK(conta.getSaldo() == 0.0);
-        CHECK(conta.getDivida() == 0.0);
-    }
+TEST_CASE("Conta - adicionar lancamento ao historico") {
+    Usuario usuario("Maria", 1);
+    Conta conta(&usuario, "Corrente");
+    Categoria categoria(Lazer, Pix);
+    Despesa despesa(50.0, &categoria, year(2026) / 10 / 5, &conta, false);
 
-    SUBCASE("Adicionando lançamentos futuros à conta") {
-        Conta conta(&usuario, "Conta Corrente");
+    conta.addLancamento(&despesa);
 
-        // Adicionando um lançamento (pode ser nullptr para testar o método se a classe permitir, 
-        // ou um objeto válido do tipo Lancamentos)
-        Lancamentos* lancamentoExemplo = nullptr; 
-        conta.addLancamento(lancamentoExemplo);
+    CHECK(conta.getLancamentos().size() == 1);
+    // so adicionar nao altera o saldo: quem altera e a Transacao
+    CHECK(conta.getSaldo() == 0.0);
+}
 
-        // Garantimos que a operação ocorre sem falhas e mantém o estado consistente
-        CHECK(conta.getSaldo() == 0.0);
-        CHECK(conta.getDivida() == 0.0);
-        CHECK(conta.NomeDaConta == "Conta Corrente");
-    }
+TEST_CASE("Conta - parametros invalidos lancam excecao") {
+    Usuario usuario("Maria", 1);
+    CHECK_THROWS_AS(Conta(&usuario, ""), std::invalid_argument);
+
+    Conta conta(&usuario, "Corrente");
+    Conta outra(&usuario, "Outra");
+    Categoria categoria(Lazer, Pix);
+    Despesa daOutraConta(10.0, &categoria, year(2026) / 10 / 5, &outra, false);
+
+    CHECK_THROWS_AS(conta.addLancamento(nullptr), std::invalid_argument);
+    CHECK_THROWS_AS(conta.addLancamento(&daOutraConta), std::invalid_argument);
+    CHECK_THROWS_AS(conta.addTransacao(nullptr), std::invalid_argument);
 }

@@ -1,42 +1,49 @@
-#include "doctest.h"
-#include "Usuario.hpp"
-#include "Conta.hpp"
+#include <stdexcept>
 
-TEST_CASE("Testando a classe Usuario e suas operações") {
-    // Cenário inicial: Criando um usuário de teste
+#include "doctest.h"
+#include "usuario.hpp"
+#include "conta.hpp"
+#include "gerenciadorfinanceiro.hpp"
+
+TEST_CASE("Usuario - dados iniciais") {
     Usuario usuario("Carlos Silva", 101, "senhaSegura123");
 
-    SUBCASE("Verificando dados iniciais do usuário (Getters)") {
-        CHECK(usuario.getUserId() == 101);
-        CHECK(usuario.getName() == "Carlos Silva");
-        // Uma nova conta recém-criada deve iniciar com a lista de contas vazia
-        CHECK(usuario.getContas().empty() == true);
-    }
+    CHECK(usuario.getId() == 101);
+    CHECK(usuario.getNome() == "Carlos Silva");
+    CHECK(usuario.getContas().empty());
+    REQUIRE(usuario.getGerenciadorFinanceiro() != nullptr);
+    CHECK(usuario.getGerenciadorFinanceiro()->getUsuario() == &usuario);
+}
 
-    SUBCASE("Criando contas com sucesso") {
-        // Criando a primeira conta
-        bool primeiraCriacao = usuario.criarConta("Conta Corrente");
-        CHECK(primeiraCriacao == true);
+TEST_CASE("Usuario - autenticacao") {
+    Usuario usuario("Carlos", 1, "abc");
 
-        // Criando uma segunda conta com nome diferente
-        bool segundaCriacao = usuario.criarConta("Conta Poupança");
-        CHECK(segundaCriacao == true);
+    CHECK(usuario.autenticar("abc"));
+    CHECK_FALSE(usuario.autenticar("ABC"));
+    CHECK_FALSE(usuario.autenticar(""));
+}
 
-        // Verificando se a quantidade de contas na lista é 2
-        CHECK(usuario.getContas().size() == 2);
-    }
+TEST_CASE("Usuario - criar e buscar contas") {
+    Usuario usuario("Carlos", 1);
 
-    SUBCASE("Tentando criar contas duplicadas (deve falhar)") {
-        // Criando a conta inicial
-        CHECK(usuario.criarConta("Conta Principal") == true);
+    CHECK(usuario.criarConta("Corrente"));
+    CHECK(usuario.criarConta("Poupanca"));
+    CHECK(usuario.getContas().size() == 2);
 
-        // Tentando criar outra conta com o mesmo nome exato
-        bool tentativaDuplicada = usuario.criarConta("Conta Principal");
-        
-        // A função deve retornar false impedindo a duplicidade
-        CHECK(tentativaDuplicada == false);
+    // nome repetido nao cria outra conta
+    CHECK_FALSE(usuario.criarConta("Corrente"));
+    CHECK(usuario.getContas().size() == 2);
 
-        // O tamanho da lista de contas deve continuar sendo 1
-        CHECK(usuario.getContas().size() == 1);
-    }
+    REQUIRE(usuario.buscarConta("Poupanca") != nullptr);
+    CHECK(usuario.buscarConta("Poupanca")->getNome() == "Poupanca");
+    CHECK(usuario.buscarConta("Inexistente") == nullptr);
+}
+
+TEST_CASE("Usuario - parametros invalidos lancam excecao") {
+    CHECK_THROWS_AS(Usuario("", 1), std::invalid_argument);
+    CHECK_THROWS_AS(Usuario("Ana", 0), std::invalid_argument);
+    CHECK_THROWS_AS(Usuario("Ana", -5), std::invalid_argument);
+
+    Usuario usuario("Ana", 1);
+    CHECK_THROWS_AS(usuario.criarConta(""), std::invalid_argument);
 }

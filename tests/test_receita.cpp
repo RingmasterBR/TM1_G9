@@ -1,42 +1,46 @@
 #include <chrono>
 
-#include "receita.hpp"
+#include "doctest.h"
+#include "usuario.hpp"
 #include "conta.hpp"
 #include "categoria.hpp"
-#include "usuario.hpp"
-#include "doctest.h"
+#include "receita.hpp"
 
+using namespace std::chrono;
 
-TEST_CASE("Testando a classe Receita e suas operacoes") {
-    // Configuração prévia de dependências necessárias
-    Usuario usuario("Ana Salario", 404, "senha789");
-    Conta conta(&usuario, "Conta Salário");
-    
-    // Instanciando categoria conforme os enums definidos em categoria.hpp
-    Categoria categoria(TipoGasto::Educacao, FormaPagamento::Pix);
-    
-    // Definindo uma data padrão usando std::chrono::year_month_day (C++20)
-    std::chrono::year_month_day dataExemplo{std::chrono::year(2026), std::chrono::month(10), std::chrono::day(5)};
+TEST_CASE("Receita - construcao") {
+    Usuario usuario("Ana", 1);
+    Conta conta(&usuario, "Salario");
+    Categoria categoria(Outros, Pix);
+    Receita receita(5000.0, &categoria, year(2026) / 10 / 5, &conta, true);
 
-    SUBCASE("Construção e verificação de atributos de uma Receita") {
-        // Criando uma receita fixa de 5000.00
-        Receita receita(5000.00, &categoria, dataExemplo, &conta, true);
+    CHECK(receita.getValor() == 5000.0);
+    CHECK_FALSE(receita.isDespesa());
+    CHECK(receita.isFixo());
+    CHECK(receita.getTipoTexto() == "Receita");
+}
 
-        CHECK(receita.valor == 5000.00);
-        CHECK(receita.tipo == Lancamentos::TipoReceita);
-        CHECK(receita.LancamentoFixo == true);
-        CHECK(receita.conta == &conta);
-        CHECK(receita.categoria == &categoria);
-    }
+TEST_CASE("Receita - data passada aumenta o saldo") {
+    Usuario usuario("Ana", 1);
+    Conta conta(&usuario, "Salario");
+    Categoria categoria(Outros, Pix);
+    Receita receita(250.0, &categoria, year(2026) / 10 / 5, &conta, false);
 
-    SUBCASE("Adicionando receita aos lançamentos futuros da conta") {
-        Receita receita(250.00, &categoria, dataExemplo, &conta, false);
+    double saldo = 100.0;
+    double divida = 40.0;
+    CHECK(receita.aplicarEfeito(saldo, divida, year(2026) / 10 / 5));
+    CHECK(saldo == 350.0);
+    CHECK(divida == 40.0);
+}
 
-        // Executando o método que adiciona à conta
-        receita.addLancamentosFuturos();
+TEST_CASE("Receita - data futura fica pendente") {
+    Usuario usuario("Ana", 1);
+    Conta conta(&usuario, "Salario");
+    Categoria categoria(Outros, Pix);
+    Receita receita(250.0, &categoria, year(2026) / 12 / 5, &conta, false);
 
-        // Verificamos que a operação ocorre sem erros e mantém o estado correto
-        CHECK(receita.valor == 250.00);
-        CHECK(receita.LancamentoFixo == false);
-    }
+    double saldo = 100.0;
+    double divida = 0.0;
+    CHECK_FALSE(receita.aplicarEfeito(saldo, divida, year(2026) / 10 / 5));
+    CHECK(saldo == 100.0);
 }

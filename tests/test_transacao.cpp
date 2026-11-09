@@ -1,25 +1,57 @@
+#include <chrono>
+#include <stdexcept>
+
 #include "doctest.h"
-#include "conta.hpp"
-#include "transacao.hpp"
 #include "usuario.hpp"
-#include "lancamentos.hpp"
+#include "conta.hpp"
+#include "categoria.hpp"
+#include "despesa.hpp"
+#include "receita.hpp"
+#include "transacao.hpp"
+#include "interfaceterminal.hpp"
 
-TEST_CASE("Testando a classe Transacao e os seus metodos principais") {
-    // Cenário inicial para associar à transação
-    Usuario usuario("Carlos Transacao", 505, "senhaTransacao123");
-    Conta conta(&usuario, "Conta Transações");
+using namespace std::chrono;
 
-    SUBCASE("Construção e verificação de getters básicos da Transação") {
-        // Criando uma transação com valor inicial
-        Transacao transacao(&conta, 100.0);
+TEST_CASE("Transacao - conta sem lancamentos nao altera nada") {
+    Usuario usuario("Carlos", 1);
+    Conta conta(&usuario, "Corrente");
+    Transacao transacao(&conta, 100.0);
 
-        // Verificando se a conta associada está correta
-        CHECK(transacao.getConta() == &conta);
-        
-        // Como o saldo e dívida iniciais da conta são 0.0, os valores esperados são 0.0
-        CHECK(transacao.getSaldoAnterior() == 0.0);
-        CHECK(transacao.getDividaAnterior() == 0.0);
-        CHECK(transacao.getSaldoFinal() == 0.0);
-        CHECK(transacao.getDividaFinal() == 0.0);
-    }
+    CHECK(transacao.getConta() == &conta);
+    CHECK(transacao.getValor() == 100.0);
+    CHECK(transacao.getSaldoAnterior() == 0.0);
+    CHECK(transacao.getDividaAnterior() == 0.0);
+    CHECK(transacao.getSaldoFinal() == 0.0);
+    CHECK(transacao.getDividaFinal() == 0.0);
+    CHECK_FALSE(transacao.registrarNaConta());
+    CHECK(conta.getTransacoes().empty());
+}
+
+TEST_CASE("Transacao - aplica os lancamentos pendentes da conta") {
+    Usuario usuario("Carlos", 1);
+    Conta conta(&usuario, "Corrente");
+    Categoria categoria(Outros, Pix);
+    year_month_day hoje = InterfaceTerminal::hoje();
+    year_month_day futuro = sys_days(hoje) + days(40);
+
+    Receita receita(1000.0, &categoria, hoje, &conta, false);
+    Despesa despesa(200.0, &categoria, hoje, &conta, false);
+    Despesa parcela(300.0, &categoria, futuro, &conta, false);
+    conta.addLancamento(&receita);
+    conta.addLancamento(&despesa);
+    conta.addLancamento(&parcela);
+
+    Transacao* transacao = new Transacao(&conta, 1000.0);
+    CHECK(transacao->getSaldoFinal() == 800.0);
+    CHECK(transacao->getDividaFinal() == 300.0);
+    REQUIRE(transacao->registrarNaConta()); // a conta passa a ser dona da transacao
+
+    CHECK(conta.getSaldo() == 800.0);
+    CHECK(conta.getDivida() == 300.0);
+    CHECK(receita.isProcessado());
+    CHECK(parcela.isProcessado());
+}
+
+TEST_CASE("Transacao - conta nula lanca excecao") {
+    CHECK_THROWS_AS(Transacao(nullptr, 10.0), std::invalid_argument);
 }
