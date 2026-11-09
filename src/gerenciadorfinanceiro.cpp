@@ -1,122 +1,216 @@
-#include <iostream>
-#include <fstream>
-#include <stdexcept>
 #include "gerenciadorfinanceiro.hpp"
 
-GerenciadorFinanceiro::GerenciadorFinanceiro(Usuario* usuario) : usuario_(usuario) {}
+#include <fstream>
+#include <iomanip>
+#include <map>
+#include <sstream>
+#include <stdexcept>
 
-Usuario* GerenciadorFinanceiro::getUsuario() {
+#include "categoria.hpp"
+#include "conta.hpp"
+#include "lancamentos.hpp"
+#include "orcamento.hpp"
+#include "usuario.hpp"
+
+// Formata uma data como dd/mm/aaaa
+static std::string formatarData(std::chrono::year_month_day data) {
+    std::ostringstream texto;
+    texto << std::setfill('0') << std::setw(2) << static_cast<unsigned>(data.day()) << "/"
+          << std::setw(2) << static_cast<unsigned>(data.month()) << "/"
+          << static_cast<int>(data.year());
+    return texto.str();
+}
+
+GerenciadorFinanceiro::GerenciadorFinanceiro(Usuario* usuario) : usuario_(usuario) {
+    if (usuario == nullptr) {
+        throw std::invalid_argument("O gerenciador precisa de um usuario.");
+    }
+}
+
+Usuario* GerenciadorFinanceiro::getUsuario() const {
     return usuario_;
 }
 
-// Registra um lancamento (despesa ou receita) nos orcamentos.
-// O saldo da conta ja foi atualizado pelo proprio lancamento
-// (addLancamentosFuturos + realizarTransacao). Aqui:
-//   1. cada Orcamento decide se o lancamento conta para ele
-//   2. verifica se algum orcamento estourou o limite
-void GerenciadorFinanceiro::registrarLancamento(Lancamentos* lancamento) {
-    if (lancamento == nullptr) {
-        return;
-    }
-    for (size_t i = 0; i < orcamentos_.size(); i++) {
-        orcamentos_[i]->adicionarLancamento(lancamento);
-    }
-    verificarOrcamentos();
+const std::vector<Orcamento*>& GerenciadorFinanceiro::getOrcamentos() const {
+    return orcamentos_;
 }
 
-// Cadastra um orcamento na lista, ignorando ponteiro nulo.
+// Fluxo principal: o lancamento entra na conta, a transacao atualiza saldo e
+// divida, e cada orcamento decide se o lancamento conta para ele.
+void GerenciadorFinanceiro::registrarLancamento(Lancamentos* lancamento, std::ostream& out) {
+    if (lancamento == nullptr) {
+        throw std::invalid_argument("Lancamento nulo.");
+    }
+    if (lancamento->getConta()->getUsuario() != usuario_) {
+        throw std::invalid_argument("O lancamento pertence a uma conta de outro usuario.");
+    }
+
+    lancamento->adicionarNaConta();
+    lancamento->realizarTransacao();
+
+    for (Orcamento* orcamento : orcamentos_) {
+        orcamento->adicionarLancamento(lancamento);
+    }
+    verificarOrcamentos(out);
+}
+
 void GerenciadorFinanceiro::adicionarOrcamento(Orcamento* orcamento) {
     if (orcamento == nullptr) {
-        return;
+        throw std::invalid_argument("Orcamento nulo.");
     }
     orcamentos_.push_back(orcamento);
 }
 
-// Percorre os orcamentos e mostra um alerta para cada um que estourou o limite.
-// Se nenhum estourou, nao imprime nada.
-void GerenciadorFinanceiro::verificarOrcamentos() {
-    for (size_t i = 0; i < orcamentos_.size(); i++) {
-        Orcamento* orcamento = orcamentos_[i];
-
+int GerenciadorFinanceiro::verificarOrcamentos(std::ostream& out) const {
+    int estourados = 0;
+    for (const Orcamento* orcamento : orcamentos_) {
         if (orcamento->estourouLimite()) {
-            std::cout << "ALERTA: orcamento";
-            if (orcamento->getCategoria() != nullptr) {
-                std::cout << " de " << orcamento->getCategoria()->getNome();
-            }
-            std::cout << " estourou o limite de R$ " << orcamento->getLimite() << std::endl;
+            estourados++;
+            out << "ALERTA: orcamento de " << orcamento->getCategoria()->getNome()
+                << " (" << orcamento->getMes() << "/" << orcamento->getAno()
+                << ") estourou o limite de R$ " << std::fixed << std::setprecision(2)
+                << orcamento->getLimite() << " (gasto: R$ " << orcamento->getValorGasto()
+                << ")\n";
         }
     }
+    return estourados;
 }
 
-// Mostra na tela os orcamentos do mes/ano pedido: limite, gasto e o que sobrou.
-void GerenciadorFinanceiro::gerarRelatorioMensal(int mes, int ano) {
-    std::cout << "===== Relatorio de " << mes << "/" << ano << " =====" << std::endl;
-    if (usuario_ != nullptr) {
-        std::cout << "Usuario: " << usuario_->getName() << std::endl;
+void GerenciadorFinanceiro::gerarRelatorioMensal(int mes, int ano, std::ostream& out) const {
+    if (mes < 1 || mes > 12) {
+        throw std::invalid_argument("Mes invalido (use 1 a 12).");
     }
 
-    int encontrados = 0;
-    for (size_t i = 0; i < orcamentos_.size(); i++) {
-        Orcamento* orcamento = orcamentos_[i];
+    out << std::fixed << std::setprecision(2);
+    out << "===== Relatorio de " << mes << "/" << ano << " =====\n";
+    out << "Usuario: " << usuario_->getNome() << "\n";
 
-        if (orcamento->getMes() == mes && orcamento->getAno() == ano) {
-            encontrados++;
-            if (orcamento->getCategoria() != nullptr) {
-                std::cout << "Categoria: " << orcamento->getCategoria()->getNome();
+    double totalReceitas = 0.0;
+    double totalDespesas = 0.0;
+    std::map<TipoGasto, double> gastosPorTipo;
+    int lancamentosNoMes = 0;
+
+    for (const Conta* conta : usuario_->getContas()) {
+        out << "\nConta: " << conta->getNome() << " | saldo atual: R$ " << conta->getSaldo()
+            << " | divida: R$ " << conta->getDivida() << "\n";
+
+        for (const Lancamentos* lancamento : conta->getLancamentos()) {
+            std::chrono::year_month_day data = lancamento->getData();
+            if (static_cast<unsigned>(data.month()) != static_cast<unsigned>(mes) ||
+                static_cast<int>(data.year()) != ano) {
+                continue;
+            }
+            lancamentosNoMes++;
+            out << "  " << formatarData(data) << "  " << std::left << std::setw(8)
+                << lancamento->getTipoTexto() << std::right << "  "
+                << lancamento->getCategoria()->getNome() << "  R$ " << lancamento->getValor()
+                << "\n";
+
+            if (lancamento->isDespesa()) {
+                totalDespesas += lancamento->getValor();
+                gastosPorTipo[lancamento->getCategoria()->getTipo()] += lancamento->getValor();
             } else {
-                std::cout << "Sem categoria";
+                totalReceitas += lancamento->getValor();
             }
-            std::cout << " | limite: " << orcamento->getLimite()
-                      << " | gasto: " << orcamento->getValorGasto()
-                      << " | restante: " << orcamento->getSaldoRestante() << std::endl;
         }
     }
 
-    // "encontrados" conta quantos orcamentos sao do periodo pedido
-    if (encontrados == 0) {
-        std::cout << "Nenhum orcamento cadastrado para este mes." << std::endl;
+    if (lancamentosNoMes == 0) {
+        out << "\nNenhum lancamento neste mes.\n";
+    }
+
+    out << "\nTotal de receitas: R$ " << totalReceitas << "\n";
+    out << "Total de despesas: R$ " << totalDespesas << "\n";
+    out << "Resultado do mes:  R$ " << totalReceitas - totalDespesas << "\n";
+
+    if (!gastosPorTipo.empty()) {
+        out << "\nGastos por tipo:\n";
+        for (const auto& par : gastosPorTipo) {
+            out << "  " << Categoria::tipoParaTexto(par.first) << ": R$ " << par.second << "\n";
+        }
+    }
+
+    out << "\nOrcamentos do mes:\n";
+    int orcamentosNoMes = 0;
+    for (const Orcamento* orcamento : orcamentos_) {
+        if (orcamento->getMes() != mes || orcamento->getAno() != ano) {
+            continue;
+        }
+        orcamentosNoMes++;
+        out << "  " << orcamento->getCategoria()->getNome()
+            << " | limite: R$ " << orcamento->getLimite()
+            << " | gasto: R$ " << orcamento->getValorGasto()
+            << " | restante: R$ " << orcamento->getSaldoRestante()
+            << (orcamento->estourouLimite() ? "  (ESTOUROU)" : "") << "\n";
+    }
+    if (orcamentosNoMes == 0) {
+        out << "  Nenhum orcamento cadastrado para este mes.\n";
     }
 }
 
-// Grava os dados em um arquivo de texto, uma linha por item, campos separados por ";"
-// Se o arquivo nao puder ser aberto, lanca excecao.
-void GerenciadorFinanceiro::salvarDados(std::string arquivo) {
-    std::ofstream saida(arquivo.c_str());
+// Uma linha por registro, campos separados por ";".
+void GerenciadorFinanceiro::salvarDados(const std::string& arquivo) const {
+    std::ofstream saida(arquivo);
     if (!saida.is_open()) {
         throw std::runtime_error("Nao foi possivel abrir o arquivo para escrita: " + arquivo);
     }
 
-    if (usuario_ != nullptr) {
-        saida << "USUARIO;" << usuario_->getName() << ";" << usuario_->getUserId() << "\n";
+    saida << std::fixed << std::setprecision(2);
+    saida << "USUARIO;" << usuario_->getNome() << ";" << usuario_->getId() << "\n";
+
+    for (const Conta* conta : usuario_->getContas()) {
+        saida << "CONTA;" << conta->getNome() << ";" << conta->getSaldo() << ";"
+              << conta->getDivida() << "\n";
+        for (const Lancamentos* lancamento : conta->getLancamentos()) {
+            const Categoria* categoria = lancamento->getCategoria();
+            saida << "LANCAMENTO;" << conta->getNome() << ";" << lancamento->getTipoTexto() << ";"
+                  << lancamento->getValor() << ";"
+                  << Categoria::tipoParaTexto(categoria->getTipo()) << ";"
+                  << Categoria::formaParaTexto(categoria->getFormaPagamento()) << ";"
+                  << formatarData(lancamento->getData()) << ";"
+                  << (lancamento->isFixo() ? "fixo" : "variavel") << "\n";
+        }
     }
 
-    for (size_t i = 0; i < orcamentos_.size(); i++) {
-        Orcamento* orcamento = orcamentos_[i];
-        std::string nomeCategoria = "";
-        if (orcamento->getCategoria() != nullptr) {
-            nomeCategoria = orcamento->getCategoria()->getNome();
-        }
-
-        saida << "ORCAMENTO;" << nomeCategoria << ";" << orcamento->getLimite() << ";"
-              << orcamento->getValorGasto() << ";" << orcamento->getMes() << ";"
-              << orcamento->getAno() << "\n";
+    for (const Orcamento* orcamento : orcamentos_) {
+        saida << "ORCAMENTO;" << orcamento->getCategoria()->getNome() << ";"
+              << orcamento->getLimite() << ";" << orcamento->getValorGasto() << ";"
+              << orcamento->getMes() << ";" << orcamento->getAno() << "\n";
     }
 }
 
-// Le o arquivo gravado pelo salvarDados. Por enquanto so conta quantas linhas
-void GerenciadorFinanceiro::carregarDados(std::string arquivo) {
-    std::ifstream entrada(arquivo.c_str());
+int GerenciadorFinanceiro::carregarDados(const std::string& arquivo) const {
+    std::ifstream entrada(arquivo);
     if (!entrada.is_open()) {
         throw std::runtime_error("Nao foi possivel abrir o arquivo para leitura: " + arquivo);
     }
 
-    
+    // Quantidade de campos esperada para cada tipo de registro
+    const std::map<std::string, int> camposPorRegistro = {
+        {"USUARIO", 3}, {"CONTA", 4}, {"LANCAMENTO", 8}, {"ORCAMENTO", 6}};
+
     std::string linha;
-    int orcamentosLidos = 0;
+    int numeroLinha = 0;
+    int registros = 0;
     while (std::getline(entrada, linha)) {
-        if (linha.compare(0, 10, "ORCAMENTO;") == 0) {
-            orcamentosLidos++;
+        numeroLinha++;
+        if (linha.empty()) {
+            continue;
         }
+        std::vector<std::string> campos;
+        std::stringstream leitor(linha);
+        std::string campo;
+        while (std::getline(leitor, campo, ';')) {
+            campos.push_back(campo);
+        }
+
+        auto registro = camposPorRegistro.find(campos[0]);
+        if (registro == camposPorRegistro.end() ||
+            static_cast<int>(campos.size()) != registro->second) {
+            throw std::runtime_error("Linha " + std::to_string(numeroLinha) +
+                                     " invalida no arquivo " + arquivo);
+        }
+        registros++;
     }
-    std::cout << "Arquivo " << arquivo << ": " << orcamentosLidos << " orcamento(s) encontrado(s)." << std::endl;
+    return registros;
 }

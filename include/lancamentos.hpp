@@ -13,7 +13,6 @@ class Conta;
 
 /**
  * @brief Classe abstrata para um lancamento financeiro (Receita ou Despesa).
- *
  * Cada subclasse define, de forma polimorfica, como o lancamento afeta o saldo
  * e a divida da conta (aplicarEfeito) e se conta como gasto (isDespesa).
  */
@@ -51,8 +50,7 @@ public:
      * @param hoje Data atual, usada para separar lancamentos passados e futuros.
      * @return true se o lancamento foi aplicado; false se deve esperar a data.
      */
-    virtual bool aplicarEfeito(double& saldo, double& divida,
-                               std::chrono::year_month_day hoje) const = 0;
+    virtual bool aplicarEfeito(double& saldo, double& divida, std::chrono::year_month_day hoje) const = 0;
 
     /**
      * @brief Indica se o lancamento e um gasto (conta para os orcamentos).

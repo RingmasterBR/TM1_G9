@@ -1,77 +1,94 @@
+/**
+ * @file gerenciadorfinanceiro.hpp
+ * @brief Declaracao da classe GerenciadorFinanceiro.
+ */
 #ifndef GERENCIADORFINANCEIRO_HPP
 #define GERENCIADORFINANCEIRO_HPP
 
+#include <iostream>
 #include <string>
 #include <vector>
-#include "usuario.hpp"
-#include "conta.hpp"
-#include "lancamentos.hpp"
-#include "orcamento.hpp"
+
+class Usuario;
+class Lancamentos;
+class Orcamento;
 
 /**
- * @brief Classe responsável por coordenar as operações entre o usuário,
- *        suas contas, transações e orçamentos.
+ * @brief Coordena as operacoes entre conta, lancamentos e orcamentos de um usuario.
  *
- * A conta a ser usada em cada operação já é escolhida previamente
- * pelo usuário (via interface) e passada diretamente para os métodos.
+ * Registra lancamentos (atualizando a conta e os orcamentos), emite alertas de
+ * orcamentos estourados, gera relatorios e exporta os dados para arquivo.
+ * O gerenciador guarda ponteiros para os orcamentos, mas nao e dono deles.
  */
 class GerenciadorFinanceiro {
 private:
-    Usuario* usuario_;
-    std::vector<Orcamento*> orcamentos_;
+    Usuario* usuario_;                   /**< Usuario dono do gerenciador. */
+    std::vector<Orcamento*> orcamentos_; /**< Orcamentos cadastrados. */
 
 public:
     /**
-     * @brief Construtor da classe GerenciadorFinanceiro.
-     * @param usuario Usuário logado no sistema.
+     * @brief Cria o gerenciador de um usuario.
+     * @param usuario Usuario dono (nao pode ser nulo).
+     * @throws std::invalid_argument se o usuario for nulo.
      */
-    GerenciadorFinanceiro(Usuario* usuario);
+    explicit GerenciadorFinanceiro(Usuario* usuario);
+
+    /** @brief Retorna o usuario. @return Ponteiro para o usuario. */
+    Usuario* getUsuario() const;
+
+    /** @brief Retorna os orcamentos. @return Referencia constante para os orcamentos. */
+    const std::vector<Orcamento*>& getOrcamentos() const;
 
     /**
-     * @brief Retorna o usuário logado.
-     * @return Ponteiro para o usuário.
-     */
-    Usuario* getUsuario();
-
-    /**
-     * @brief Registra um lançamento na conta indicada pelo próprio lançamento.
+     * @brief Registra um lancamento na conta dele e nos orcamentos.
      *
-     * Repassa o lançamento aos orçamentos e verifica se algum deles
-     * estourou o limite. O saldo da conta é atualizado antes, pelo próprio
-     * lançamento (addLancamentosFuturos + realizarTransacao).
-     * @param lancamento Ponteiro para o lançamento (Despesa ou Receita) a ser registrado.
+     * Adiciona o lancamento a conta, cria a transacao que atualiza saldo e
+     * divida, repassa o lancamento aos orcamentos e emite os alertas.
+     * @param lancamento Lancamento (Receita ou Despesa) a registrar.
+     * @param out Onde os alertas sao escritos.
+     * @throws std::invalid_argument se o lancamento for nulo ou de uma conta de outro usuario.
      */
-    void registrarLancamento(Lancamentos* lancamento);
+    void registrarLancamento(Lancamentos* lancamento, std::ostream& out = std::cout);
 
     /**
-     * @brief Adiciona um novo orçamento à gestão do usuário.
-     * @param orcamento Ponteiro para o orçamento a ser adicionado.
+     * @brief Adiciona um orcamento.
+     * @param orcamento Orcamento a adicionar.
+     * @throws std::invalid_argument se o orcamento for nulo.
      */
     void adicionarOrcamento(Orcamento* orcamento);
 
     /**
-     * @brief Verifica todos os orçamentos e alerta sobre os que ultrapassaram o limite.
+     * @brief Escreve um alerta para cada orcamento que estourou o limite.
+     * @param out Onde os alertas sao escritos.
+     * @return Quantidade de orcamentos estourados.
      */
-    void verificarOrcamentos();
+    int verificarOrcamentos(std::ostream& out = std::cout) const;
 
     /**
-     * @brief Gera um relatório com o resumo financeiro do mês informado.
-     * @param mes Mês de referência (1 a 12).
-     * @param ano Ano de referência.
+     * @brief Escreve o relatorio de um mes: receitas, despesas, gastos por tipo e orcamentos.
+     * @param mes Mes de referencia (1 a 12).
+     * @param ano Ano de referencia.
+     * @param out Onde o relatorio e escrito.
+     * @throws std::invalid_argument se o mes for invalido.
      */
-    void gerarRelatorioMensal(int mes, int ano);
+    void gerarRelatorioMensal(int mes, int ano, std::ostream& out = std::cout) const;
 
     /**
-     * @brief Salva os dados do sistema em um arquivo de texto.
+     * @brief Exporta usuario, contas, lancamentos e orcamentos para um arquivo de texto.
+     *
+     * Formato: uma linha por registro, campos separados por ';'.
      * @param arquivo Caminho do arquivo de destino.
+     * @throws std::runtime_error se o arquivo nao puder ser aberto.
      */
-    void salvarDados(std::string arquivo);
+    void salvarDados(const std::string& arquivo) const;
 
     /**
-     * @brief Carrega os dados do sistema a partir de um arquivo de texto.
+     * @brief Le um arquivo gerado por salvarDados e conta os registros validos.
      * @param arquivo Caminho do arquivo de origem.
+     * @return Quantidade de registros reconhecidos.
+     * @throws std::runtime_error se o arquivo nao puder ser aberto ou tiver linha invalida.
      */
-    void carregarDados(std::string arquivo);
+    int carregarDados(const std::string& arquivo) const;
 };
 
 #endif

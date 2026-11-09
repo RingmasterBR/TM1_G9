@@ -1,53 +1,65 @@
-#include <iostream>
-#include <string>
-#include <list>
-
 #include "usuario.hpp"
+
+#include <stdexcept>
+
 #include "conta.hpp"
 #include "gerenciadorfinanceiro.hpp"
 
-// Construtor usando a lista de inicialização
-Usuario::Usuario(std::string nomeUsuario, int idUsuario, std::string senhaUsuario): nome(nomeUsuario), id(idUsuario), senha(senhaUsuario) {
-     gerenciadorFinanceiro = new GerenciadorFinanceiro(this);
-} 
+Usuario::Usuario(const std::string& nome, int id, const std::string& senha)
+    : nome_(nome), id_(id), senha_(senha), gerenciador_(nullptr) {
+    if (nome.empty()) {
+        throw std::invalid_argument("O nome do usuario nao pode ser vazio.");
+    }
+    if (id <= 0) {
+        throw std::invalid_argument("O id do usuario deve ser positivo.");
+    }
+    gerenciador_ = new GerenciadorFinanceiro(this);
+}
 
 // Desaloca o gerenciador e as contas criadas por criarConta
 Usuario::~Usuario() {
-    delete gerenciadorFinanceiro;
-    for (Conta* c : listaContas) {
-        delete c;
+    delete gerenciador_;
+    for (Conta* conta : contas_) {
+        delete conta;
     }
 }
 
-bool Usuario::autenticar(std::string senhaDigitada) {
-    return senha == senhaDigitada;
+int Usuario::getId() const {
+    return id_;
 }
 
-int Usuario::getUserId() {
-    return id;
+std::string Usuario::getNome() const {
+    return nome_;
 }
 
-std::string Usuario::getName() {
-    return nome;
+std::list<Conta*> Usuario::getContas() const {
+    return contas_;
 }
 
-GerenciadorFinanceiro* Usuario::getGerenciadorFinanceiro(){
-    return gerenciadorFinanceiro;
-}
-
-// Percorre a lista de contas do usuário para verificar duplicidade e criar nova conta
-bool Usuario::criarConta(std::string nomedaConta) {
-    for (auto* c : listaContas) {
-        if (c->NomeDaConta == nomedaConta) {
-            return false; // Conta com esse nome já existe
+Conta* Usuario::buscarConta(const std::string& nomeConta) const {
+    for (Conta* conta : contas_) {
+        if (conta->getNome() == nomeConta) {
+            return conta;
         }
     }
-    // Se não encontrou nenhuma igual, cria  e adiciona
-    Conta* novaConta = new Conta(this, nomedaConta);
-    listaContas.push_back(novaConta);
-    return true;
+    return nullptr;
 }
 
-std::list<Conta*> Usuario::getContas() {
-    return listaContas;
+GerenciadorFinanceiro* Usuario::getGerenciadorFinanceiro() const {
+    return gerenciador_;
+}
+
+bool Usuario::autenticar(const std::string& senhaDigitada) const {
+    return senha_ == senhaDigitada;
+}
+
+bool Usuario::criarConta(const std::string& nomeConta) {
+    if (nomeConta.empty()) {
+        throw std::invalid_argument("O nome da conta nao pode ser vazio.");
+    }
+    if (buscarConta(nomeConta) != nullptr) {
+        return false; // ja existe conta com esse nome
+    }
+    contas_.push_back(new Conta(this, nomeConta));
+    return true;
 }
