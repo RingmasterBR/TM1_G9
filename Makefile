@@ -4,13 +4,13 @@ CFLAGS = -std=c++20 -Wall -Wextra --coverage -Iinclude -Itests -O0
 # Arquivos objeto das classes do sistema
 OBJS = obj/usuario.o obj/conta.o obj/categoria.o obj/lancamentos.o \
        obj/despesa.o obj/receita.o obj/transacao.o obj/orcamento.o \
-       obj/gerenciadorfinanceiro.o
+       obj/gerenciadorfinanceiro.o obj/interfaceterminal.o
 
 # Arquivos objeto dos testes
 TEST_OBJS = obj/main_test.o obj/test_usuario.o obj/test_conta.o \
             obj/test_categoria.o obj/test_lancamentos.o obj/test_despesa.o \
             obj/test_receita.o obj/test_transacao.o obj/test_orcamento.o \
-            obj/test_gerenciadorfinanceiro.o
+            obj/test_gerenciadorfinanceiro.o obj/test_interfaceterminal.o
 
 all: sistema
 
