@@ -203,8 +203,10 @@ int GerenciadorFinanceiro::carregarDados(const std::string& arquivo) const {
         while (std::getline(leitor, campo, ';')) {
             campos.push_back(campo);
         }
-
+        
+        //Procura o registro referente ao campo zero(primeiro campo da linha lida atualmente).
         auto registro = camposPorRegistro.find(campos[0]);
+        //Verifica: se o registro nao e nenhum dos indicados ou se o tamanho do registro e diferente do definido.
         if (registro == camposPorRegistro.end() ||
             static_cast<int>(campos.size()) != registro->second) {
             throw std::runtime_error("Linha " + std::to_string(numeroLinha) +
